@@ -1,4 +1,7 @@
 *.log
+*.swp
+*.gch
+*.out
 
 # Compiled Object files
 *.slo
