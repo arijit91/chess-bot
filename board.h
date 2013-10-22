@@ -2,8 +2,10 @@
 #define BOARD_H
 #include<bitset>
 #include<string>
+#include<vector>
 
 #include"constants.h"
+#include"move.h"
 using namespace std;
 
 class Board {
@@ -16,10 +18,17 @@ class Board {
   int halfmove;
   int fullmove;
 
+  vector<Move> moveList;
+
   public:
-  string sqtostr(int);
+  static string sqtostr(int);
 
   void setPositionFromFEN(string);
   void printBoard(bool castle = true, bool enp = true, bool moves = true);
+  void generateMoveList();
+  void generateKnightMoves();
+  void printMoveList();
+  void addMove(Move &);
+  string getMove();
 };
 #endif

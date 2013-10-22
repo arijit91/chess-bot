@@ -1,6 +1,7 @@
 #include<iostream>
 #include<map>
 #include<cassert>
+
 #include "board.h"
 using namespace std;
 
@@ -18,7 +19,7 @@ void Board::setPositionFromFEN(string fenString) {
   M['R'] = WR, M['N'] = WN, M['B'] = WB, M['Q'] = WQ, M['K'] = WK, 
     M['P'] = WP;
   int cur = 0;
-  for (int i = h1; i >= a1; i -= 8) {
+  for (int i = a8; i >= a1; i -= 8) {
     int ind = 0;
     while (1) { 
       c = fenString[cur++];
@@ -100,7 +101,7 @@ void Board::printBoard(bool castle, bool enp, bool moves) {
     M[BK] = 'k';
   M[NO_PIECE] = '.';
 
-  for (int i = h1; i >= a1; i-=8) {
+  for (int i = a8; i >= a1; i-=8) {
     for (int j = 0; j < 8; j++)
       cout<<M[board[i+j]];
     cout<<endl;
@@ -122,4 +123,50 @@ void Board::printBoard(bool castle, bool enp, bool moves) {
     cout<<"Halfmove: "<<halfmove<<endl;
     cout<<"Fullmove: "<<fullmove<<endl;
   }
+}
+
+void Board::addMove(Move& m) {
+  moveList.push_back(m);
+}
+
+void Board::generateKnightMoves() {
+  if (turn == TURN_WHITE) {
+    if (board[b1] == WN) {
+      Move m(b1, c3, false);
+      addMove(m);
+    }
+    else {
+      assert(board[c3] == WN);
+      Move m(c3, b1, false);
+      addMove(m);
+    }
+  }
+  else {
+    if (board[b8] == BN) {
+      Move m(b8, c6, false);
+      addMove(m);
+    }
+    else {
+      assert(board[c6] == BN);
+      Move m(c6, b8, false);
+      addMove(m);
+    }
+  }
+}
+
+void Board::generateMoveList() {
+  generateKnightMoves();
+}
+
+void Board::printMoveList() {
+  for (int i = 0; i < moveList.size() ; i++) {
+    cout<<moveList[i].print()<<endl;
+    cout<<endl;
+  }
+}
+
+string Board::getMove() {
+  generateMoveList();
+  Move m = moveList[0];
+  return m.print();
 }
