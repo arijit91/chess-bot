@@ -78,6 +78,7 @@ void Board::setPositionFromFEN(string fenString) {
 
   while ((cur < fenString.size())) {
     c = fenString[cur++];
+    if (c < '0' || c > '9') break;
     fm = (fm * 10) + (c - '0');
   }
 
@@ -130,37 +131,15 @@ void Board::addMove(Move& m) {
 }
 
 void Board::generateKnightMoves() {
-  if (turn == TURN_WHITE) {
-    if (board[b1] == WN) {
-      Move m(b1, c3, false);
-      addMove(m);
-    }
-    else {
-      assert(board[c3] == WN);
-      Move m(c3, b1, false);
-      addMove(m);
-    }
-  }
-  else {
-    if (board[b8] == BN) {
-      Move m(b8, c6, false);
-      addMove(m);
-    }
-    else {
-      assert(board[c6] == BN);
-      Move m(c6, b8, false);
-      addMove(m);
-    }
-  }
 }
 
 void Board::generateMoveList() {
-  generateKnightMoves();
+  moveList.clear();
 }
 
 void Board::printMoveList() {
   for (int i = 0; i < moveList.size() ; i++) {
-    cout<<moveList[i].print()<<endl;
+    cout<<moveList[i].getStr()<<endl;
     cout<<endl;
   }
 }
@@ -168,5 +147,5 @@ void Board::printMoveList() {
 string Board::getMove() {
   generateMoveList();
   Move m = moveList[0];
-  return m.print();
+  return m.getStr();
 }

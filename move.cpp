@@ -13,7 +13,7 @@ Move::Move(square_type from, square_type to, bool is_capture, piece_type promote
   this->promoted = promoted;
 }
 
-string Move::print() {
+string Move::getStr() {
   assert(0 <= from && from < 64);
   assert(0 <= to && to < 64);
 

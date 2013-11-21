@@ -3,7 +3,7 @@
 #include<string>
 using namespace std;
 
-#define NAME "TempName"
+#define NAME "Balrog"
 
 #define WHITE 0
 #define BLACK 1

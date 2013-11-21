@@ -15,6 +15,6 @@ class Move {
 
   public:
   Move(square_type, square_type, bool, piece_type promoted=NO_PIECE);
-  string print();
+  string getStr();
 };
 #endif
