@@ -5,9 +5,6 @@ using namespace std;
 
 #define NAME "Balrog"
 
-#define WHITE 0
-#define BLACK 1
-
 enum piece_type {WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK, NO_PIECE};
 
 enum square_type {
@@ -21,5 +18,5 @@ enum square_type {
   a8, b8, c8, d8, e8, f8, g8, h8, NO_SQUARE
 };
 
-enum turn_type {TURN_WHITE, TURN_BLACK};
+enum colour_type {WHITE, BLACK};
 #endif

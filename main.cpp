@@ -3,6 +3,7 @@
 #include<string>
 #include<cstdio>
 #include<cstring>
+#include<ctime>
 #include<cstdlib>
 
 #include"constants.h"
@@ -11,17 +12,17 @@ using namespace std;
 
 string startFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-Board b;
+Board board;
 
 void setupBoard(string s) {
   assert(s.substr(0, 13) == "position fen ");
-  string fen = s.substr(14);
-  b.setPositionFromFEN(fen);
+  string fen = s.substr(13);
+  board.setPositionFromFEN(fen);
   return ;
 }
 
 void go(string line) {
-  printf("bestmove %s\n", b.getMove().c_str());
+  printf("bestmove %s\n", board.getMove().c_str());
 }
 
 void UciLoop() {
@@ -61,6 +62,7 @@ void UciLoop() {
 }
 
 int main() {
+  srand(time(0));
 	char line[256];
 	while (1) {
 		memset(&line[0], 0, sizeof(line));

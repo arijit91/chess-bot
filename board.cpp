@@ -4,7 +4,11 @@
 #include<cstdlib>
 
 #include "board.h"
+#include "utils.h"
 using namespace std;
+
+int dKnight[8] = {-17, -15, -10, -6, 6, 10, 15, 17};
+int dKing[8] = {-9, -8, -7, -1, 1, 7, 8, 9};
 
 void Board::setPositionFromFEN(string fenString) {
   map<char, piece_type> M;
@@ -37,8 +41,8 @@ void Board::setPositionFromFEN(string fenString) {
 
   assert(fenString[cur++] == ' ');
   c = fenString[cur++];
-  if (c == 'w') turn = TURN_WHITE;
-  else turn = TURN_BLACK;
+  if (c == 'w') turn = WHITE;
+  else turn = BLACK;
 
   assert(fenString[cur++] == ' ');
   castle_rights.reset();
@@ -75,14 +79,6 @@ void Board::setPositionFromFEN(string fenString) {
   fullmove = fm;
 }
 
-string Board::sqtostr(int num) {
-  if (num == NO_SQUARE) return "None";
-  string ret = "";
-  ret += ('a' + (num % 8));
-  ret += ('1' + (num / 8));
-  return ret;
-}
-
 void Board::printBoard(bool castle, bool enp, bool moves) {
   map<int, char> M;
   M[WP] = 'P', M[WN] = 'N', M[WB] = 'B', M[WR] = 'R', M[WQ] = 'Q',
@@ -115,14 +111,28 @@ void Board::printBoard(bool castle, bool enp, bool moves) {
   }
 }
 
+int Board::getKingPos(int turn) {
+  for (int i = a1; i <= a8; i++) {
+    for (int j = 0; j < 8; j++) {
+      if (board[i+j] == getKingVal(turn))
+        return (i+j);
+    }
+  }
+}
+
 bool Board::inCheck() {
   return false;
+  //int kingPos = getKingPos(turn);
+  //if (turn == WHITE) {
+  //  for (int i = 0; i < 8; i++) {
+
+  //  }
+  //}
 }
 
 void Board::undoMove() {
   assert(undoMoveList.size() > 0);
   *this = undoMoveList.back();
-  undoMoveList.pop_back();
 }
 
 void Board::addMove(Move& m) {
@@ -137,16 +147,96 @@ bool Board::isMoveValid(Move& m) {
   makeMove(m);
   bool valid = inCheck();
   undoMove();
-  return valid;
+  return !valid;
+}
+
+bool Board::isEmpty(int sq) {
+  return (board[sq] == NO_PIECE);
+}
+
+bool Board::isColour(int sq, int clr) {
+  int c = board[sq];
+  if (clr == WHITE && (c >= 0 && c<= 5)) return true;
+  if (clr == BLACK && (c >= 6 && c <= 11)) return true;
+  return false;
 }
 
 void Board::generateKnightMoves() {
+  for (int i = a1; i <= a8; i++) {
+    for (int j = 0; j < 8; j++) {
+      if (board[i+j] == getKnightVal(turn)) {
+        for (int k = 0; k < 8; k++) {
+          int t = i + j + dKnight[k];
+          if (getManhattanDistance(t, i+j) != 3) continue;
+          if (isValidSquare(t) && (isEmpty(t) || isColour(t, 1-turn))) {
+            bool is_capture = !isEmpty(t);
+            Move m(i+j, t, is_capture);
+            if (isMoveValid(m)) {
+              addMove(m);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+void Board::generatePawnMoves() {
+  vector<Move> moves;
+  for (int i = a1; i <= a8; i++) {
+    for (int j = 0; j < 8; j++) {
+      int sq = i+j;
+      if (board[sq] == getPawnVal(turn)) {
+        int newsq;
+        if (turn == WHITE) newsq = sq + 8;
+        else newsq = sq - 8;
+
+        if (isValidSquare(newsq) && isEmpty(newsq)) {
+          if ((turn == WHITE && newsq >= a8) || (turn == BLACK && newsq <= h1)) {
+            moves.push_back(Move(sq, newsq, false, getKnightVal(turn)));
+            moves.push_back(Move(sq, newsq, false, getBishopVal(turn)));
+            moves.push_back(Move(sq, newsq, false, getRookVal(turn)));
+            moves.push_back(Move(sq, newsq, false, getQueenVal(turn)));
+          }
+          else {
+            moves.push_back(Move(sq, newsq, false));
+          }
+        }
+      }
+    }
+  }
+  for (int i = 0; i < moves.size(); i++) {
+    if (isMoveValid(moves[i])) {
+      addMove(moves[i]);
+    }
+  }
+}
+
+void Board::generateKingMoves() {
+  for (int i = a1; i <= a8; i++) {
+    for (int j = 0; j < 8; j++) {
+      if (board[i+j] == getKingVal(turn)) {
+        for (int k = 0; k < 8; k++) {
+          int t = i + j + dKing[k];
+          if (getManhattanDistance(t, i+j) > 2) continue;
+          if (isValidSquare(t) && (isEmpty(t) || isColour(t, 1-turn))) {
+            bool is_capture = !isEmpty(t);
+            Move m(i+j, t, is_capture);
+            if (isMoveValid(m)) {
+              addMove(m);
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 void Board::generateMoveList() {
   possibleMovesList.clear();
-
   generateKnightMoves();
+  generatePawnMoves();
+  generateKingMoves();
 }
 
 void Board::printMoveList() {

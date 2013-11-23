@@ -4,21 +4,22 @@
 
 #include "move.h"
 #include "board.h"
+#include "utils.h"
 using namespace std;
 
-Move::Move(square_type from, square_type to, bool is_capture, piece_type promoted) {
-  this->from = from;
-  this->to = to;
+Move::Move(int from, int to, bool is_capture, int promoted) {
+  this->from = (square_type) from;
+  this->to = (square_type) to;
   this->is_capture = is_capture;
-  this->promoted = promoted;
+  this->promoted = (piece_type) promoted;
 }
 
 string Move::getStr() {
   assert(0 <= from && from < 64);
   assert(0 <= to && to < 64);
 
-  string from = Board::sqtostr(this->from);
-  string to = Board::sqtostr(this->to);
+  string from = sqtostr(this->from);
+  string to = sqtostr(this->to);
 
   string ret = "";
 

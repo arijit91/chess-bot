@@ -14,7 +14,7 @@ class Move {
   int score;
 
   public:
-  Move(square_type, square_type, bool, piece_type promoted=NO_PIECE);
+  Move(int, int, bool, int promoted=NO_PIECE);
   string getStr();
 };
 #endif
