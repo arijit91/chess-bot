@@ -22,6 +22,4 @@ enum square_type {
 };
 
 enum turn_type {TURN_WHITE, TURN_BLACK};
-
-extern string startFEN;
 #endif

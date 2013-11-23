@@ -1,6 +1,7 @@
 #include<iostream>
 #include<map>
 #include<cassert>
+#include<cstdlib>
 
 #include "board.h"
 using namespace std;
@@ -8,11 +9,6 @@ using namespace std;
 void Board::setPositionFromFEN(string fenString) {
   map<char, piece_type> M;
   char c;
-
-  pawns[0].reset();
-  pawns[1].reset();
-
-  //pieces[WP] = pieces[BP] = pieces[NO_PIECE] = NO_SQUARE;
 
   M['r'] = BR, M['n'] = BN, M['b'] = BB, M['q'] = BQ, M['k'] = BK, 
     M['p'] = BP;
@@ -32,13 +28,6 @@ void Board::setPositionFromFEN(string fenString) {
         }
       }
       else {
-        if (c == 'p') pawns[BLACK].set(i + ind);
-        if (c == 'P') pawns[WHITE].set(i + ind);
-
-        //if (c != 'p' && c != 'P') {
-        //    pieces[M[c]] = (square_type) (i + ind);
-        //}
-
         board[i + ind] = M[c];
         ind++;
       }
@@ -126,26 +115,50 @@ void Board::printBoard(bool castle, bool enp, bool moves) {
   }
 }
 
+bool Board::inCheck() {
+  return false;
+}
+
+void Board::undoMove() {
+  assert(undoMoveList.size() > 0);
+  *this = undoMoveList.back();
+  undoMoveList.pop_back();
+}
+
 void Board::addMove(Move& m) {
-  moveList.push_back(m);
+  possibleMovesList.push_back(m);
+}
+
+void Board::makeMove(Move& m) {
+  undoMoveList.push_back(*this);
+}
+
+bool Board::isMoveValid(Move& m) {
+  makeMove(m);
+  bool valid = inCheck();
+  undoMove();
+  return valid;
 }
 
 void Board::generateKnightMoves() {
 }
 
 void Board::generateMoveList() {
-  moveList.clear();
+  possibleMovesList.clear();
+
+  generateKnightMoves();
 }
 
 void Board::printMoveList() {
-  for (int i = 0; i < moveList.size() ; i++) {
-    cout<<moveList[i].getStr()<<endl;
+  for (int i = 0; i < possibleMovesList.size() ; i++) {
+    cout<<possibleMovesList[i].getStr()<<endl;
     cout<<endl;
   }
 }
 
 string Board::getMove() {
   generateMoveList();
-  Move m = moveList[0];
+  int sz = possibleMovesList.size();
+  Move m = possibleMovesList[rand()%sz];
   return m.getStr();
 }
