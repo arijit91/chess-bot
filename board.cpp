@@ -181,6 +181,111 @@ void Board::generateKnightMoves() {
   }
 }
 
+void Board::generateBishopMoves() {
+  for (int i = a1; i <= a8; i++)
+    for (int j = 0; j < 8; j++)
+      if (board[i+j] == getBishopVal(turn))
+        for (int k = 0; k < 4; k++)
+          for (int dist = 1; dist <= 7; dist++) {
+            int rank = getRank(i+j);
+            int file = getFile(i+j);
+
+            if (k % 2 == 0) rank -= dist; else rank += dist; 
+            if (k / 2 == 0) file -= dist; else file += dist; 
+
+            if (rank < 0 || rank >= 8 || file < 0 || file >= 8) continue;
+            int t = getSq(rank, file);
+
+            if (isValidSquare(t) && (isEmpty(t) || isColour(t, 1-turn))) {
+              bool is_capture = !isEmpty(t);
+              Move m(i+j, t, is_capture);
+              if (isMoveValid(m)) {
+                addMove(m);
+              }
+            }
+            if (!isEmpty(t)) break;
+          }
+}
+
+void Board::generateRookMoves() {
+  for (int i = a1; i <= a8; i++)
+    for (int j = 0; j < 8; j++)
+      if (board[i+j] == getRookVal(turn))
+        for (int k = 0; k < 4; k++)
+          for (int dist = 1; dist <= 7; dist++) {
+            int rank = getRank(i+j);
+            int file = getFile(i+j);
+
+            if (k == 0) file += dist;
+            if (k == 1) rank += dist; 
+            if (k == 2) file -= dist; 
+            if (k == 3) rank -= dist; 
+
+            if (rank < 0 || rank >= 8 || file < 0 || file >= 8) continue;
+            int t = getSq(rank, file);
+
+            if (isValidSquare(t) && (isEmpty(t) || isColour(t, 1-turn))) {
+              bool is_capture = !isEmpty(t);
+              Move m(i+j, t, is_capture);
+              if (isMoveValid(m)) {
+                addMove(m);
+              }
+            }
+            if (!isEmpty(t)) break;
+          }
+}
+
+void Board::generateQueenMoves() {
+  for (int i = a1; i <= a8; i++)
+    for (int j = 0; j < 8; j++)
+      if (board[i+j] == getQueenVal(turn))
+        for (int k = 0; k < 4; k++)
+          for (int dist = 1; dist <= 7; dist++) {
+            int rank = getRank(i+j);
+            int file = getFile(i+j);
+
+            if (k == 0) file += dist;
+            if (k == 1) rank += dist; 
+            if (k == 2) file -= dist; 
+            if (k == 3) rank -= dist; 
+
+            if (rank < 0 || rank >= 8 || file < 0 || file >= 8) continue;
+            int t = getSq(rank, file);
+
+            if (isValidSquare(t) && (isEmpty(t) || isColour(t, 1-turn))) {
+              bool is_capture = !isEmpty(t);
+              Move m(i+j, t, is_capture);
+              if (isMoveValid(m)) {
+                addMove(m);
+              }
+            }
+            if (!isEmpty(t)) break;
+          }
+  for (int i = a1; i <= a8; i++)
+    for (int j = 0; j < 8; j++)
+      if (board[i+j] == getQueenVal(turn))
+        for (int k = 0; k < 4; k++)
+          for (int dist = 1; dist <= 7; dist++) {
+            int rank = getRank(i+j);
+            int file = getFile(i+j);
+
+            if (k % 2 == 0) rank -= dist; else rank += dist; 
+            if (k / 2 == 0) file -= dist; else file += dist; 
+
+            if (rank < 0 || rank >= 8 || file < 0 || file >= 8) continue;
+            int t = getSq(rank, file);
+
+            if (isValidSquare(t) && (isEmpty(t) || isColour(t, 1-turn))) {
+              bool is_capture = !isEmpty(t);
+              Move m(i+j, t, is_capture);
+              if (isMoveValid(m)) {
+                addMove(m);
+              }
+            }
+            if (!isEmpty(t)) break;
+          }
+}
+
 void Board::generatePawnMoves() {
   vector<Move> moves;
   for (int i = a1; i <= a8; i++) {
@@ -191,17 +296,82 @@ void Board::generatePawnMoves() {
         if (turn == WHITE) newsq = sq + 8;
         else newsq = sq - 8;
 
+        // pushes
         if (isValidSquare(newsq) && isEmpty(newsq)) {
           if ((turn == WHITE && newsq >= a8) || (turn == BLACK && newsq <= h1)) {
             moves.push_back(Move(sq, newsq, false, getKnightVal(turn)));
             moves.push_back(Move(sq, newsq, false, getBishopVal(turn)));
             moves.push_back(Move(sq, newsq, false, getRookVal(turn)));
             moves.push_back(Move(sq, newsq, false, getQueenVal(turn)));
+
           }
           else {
             moves.push_back(Move(sq, newsq, false));
           }
         }
+
+        if (turn == WHITE && getRank(sq) == 1 && isValidSquare(sq + 16) && isEmpty(sq + 8) && isEmpty(sq + 16)) {
+          moves.push_back(Move(sq, sq + 16, false));
+        }
+        if (turn == BLACK && getRank(sq) == 6 && isValidSquare(sq - 16) && isEmpty(sq - 8) && isEmpty(sq - 16)) {
+          moves.push_back(Move(sq, sq - 16, false));
+        }
+
+        // captures
+        if (turn == WHITE && getFile(sq) >= 1 && isValidSquare(sq + 7) && isColour(sq + 7, BLACK)) {
+          if (sq + 7 >= a8) {
+            moves.push_back(Move(sq, sq + 7, true, getKnightVal(turn)));
+            moves.push_back(Move(sq, sq + 7, true, getBishopVal(turn)));
+            moves.push_back(Move(sq, sq + 7, true, getRookVal(turn)));
+            moves.push_back(Move(sq, sq + 7, true, getQueenVal(turn)));
+          }
+          else {
+            moves.push_back(Move(sq, sq + 7, true));
+          }
+        }
+        if (turn == WHITE && getFile(sq) < 7 && isValidSquare(sq + 9) && isColour(sq + 9, BLACK)) {
+          if (sq + 9 >= a8) {
+            moves.push_back(Move(sq, sq + 9, true, getKnightVal(turn)));
+            moves.push_back(Move(sq, sq + 9, true, getBishopVal(turn)));
+            moves.push_back(Move(sq, sq + 9, true, getRookVal(turn)));
+            moves.push_back(Move(sq, sq + 9, true, getQueenVal(turn)));
+          }
+          else {
+            moves.push_back(Move(sq, sq + 9, true));
+          }
+        }
+        if (turn == BLACK && getFile(sq) < 7 && isValidSquare(sq - 7) && isColour(sq - 7, WHITE)) {
+          if (sq - 7 <= h1) {
+            moves.push_back(Move(sq, sq - 7, true, getKnightVal(turn)));
+            moves.push_back(Move(sq, sq - 7, true, getBishopVal(turn)));
+            moves.push_back(Move(sq, sq - 7, true, getRookVal(turn)));
+            moves.push_back(Move(sq, sq - 7, true, getQueenVal(turn)));
+          }
+          else {
+            moves.push_back(Move(sq, sq - 7, true));
+          }
+        }
+        if (turn == BLACK && getFile(sq) >= 1 && isValidSquare(sq - 9) && isColour(sq - 9, WHITE)) {
+          if (sq - 9 <= h1) {
+            moves.push_back(Move(sq, sq - 9, true, getKnightVal(turn)));
+            moves.push_back(Move(sq, sq - 9, true, getBishopVal(turn)));
+            moves.push_back(Move(sq, sq - 9, true, getRookVal(turn)));
+            moves.push_back(Move(sq, sq - 9, true, getQueenVal(turn)));
+          }
+          else {
+            moves.push_back(Move(sq, sq - 9, true));
+          }
+        }
+
+        // en passant
+        if (turn == WHITE && getRank(sq) == 4 && ((enp_square == sq + 9) || (enp_square == sq + 7))) {
+          moves.push_back(Move(sq, enp_square, true));
+        }
+
+        if (turn == BLACK && getRank(sq) == 3 && ((enp_square == sq - 9) || (enp_square == sq - 7))) {
+          moves.push_back(Move(sq, enp_square, true));
+        }
+        
       }
     }
   }
@@ -234,9 +404,12 @@ void Board::generateKingMoves() {
 
 void Board::generateMoveList() {
   possibleMovesList.clear();
-  generateKnightMoves();
+  //generateKnightMoves();
   generatePawnMoves();
-  generateKingMoves();
+  //generateKingMoves();
+  //generateBishopMoves();
+  //generateRookMoves();
+  //generateQueenMoves();
 }
 
 void Board::printMoveList() {

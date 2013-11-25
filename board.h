@@ -30,6 +30,9 @@ class Board {
 
   void generateMoveList();
   void generateKnightMoves();
+  void generateBishopMoves();
+  void generateRookMoves();
+  void generateQueenMoves();
   void generatePawnMoves();
   void generateKingMoves();
   void makeMove(Move&);
