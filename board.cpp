@@ -2,6 +2,7 @@
 #include<map>
 #include<cassert>
 #include<cstdlib>
+#include<cstdio>
 
 #include "board.h"
 #include "utils.h"
@@ -111,23 +112,101 @@ void Board::printBoard(bool castle, bool enp, bool moves) {
   }
 }
 
-int Board::getKingPos(int turn) {
+int Board::getKingPos(int clr) {
   for (int i = a1; i <= a8; i++) {
     for (int j = 0; j < 8; j++) {
-      if (board[i+j] == getKingVal(turn))
+      if (board[i+j] == getKingVal(clr))
         return (i+j);
     }
   }
 }
 
-bool Board::inCheck() {
-  return false;
-  //int kingPos = getKingPos(turn);
-  //if (turn == WHITE) {
-  //  for (int i = 0; i < 8; i++) {
+bool Board::isAttacked(int attackedSq, int attackingSq) {
+  int attackingClr;
+  assert(board[attackingSq] <= 11);
+  attackingClr = 0;
+  if (board[attackingSq] >= 6) {
+    attackingClr = 1;
+  }
 
-  //  }
-  //}
+  if (board[attackingSq] == getBishopVal(attackingClr) || board[attackingSq] == getQueenVal(attackingClr)) {
+    for (int k = 0; k < 4; k++)
+      for (int dist = 1; dist <= 7; dist++) {
+        int rank = getRank(attackingSq);
+        int file = getFile(attackingSq);
+
+        if (k % 2 == 0) rank -= dist; else rank += dist; 
+        if (k / 2 == 0) file -= dist; else file += dist; 
+
+        if (rank < 0 || rank >= 8 || file < 0 || file >= 8) continue;
+        int t = getSq(rank, file);
+
+        if (isValidSquare(t) && (isEmpty(t) || isColour(t, 1-attackingClr))) {
+          if (t == attackedSq) return true;
+        }
+        if (!isEmpty(t)) break;
+      }
+  }
+  if (board[attackingSq] == getRookVal(attackingClr) || board[attackingSq] == getQueenVal(attackingClr)) {
+    for (int k = 0; k < 4; k++)
+      for (int dist = 1; dist <= 7; dist++) {
+        int rank = getRank(attackingSq);
+        int file = getFile(attackingSq);
+
+        if (k == 0) file += dist;
+        if (k == 1) rank += dist; 
+        if (k == 2) file -= dist; 
+        if (k == 3) rank -= dist; 
+
+        if (rank < 0 || rank >= 8 || file < 0 || file >= 8) continue;
+        int t = getSq(rank, file);
+
+        if (isValidSquare(t) && (isEmpty(t) || isColour(t, 1-attackingClr))) {
+          if (t == attackedSq) return true;
+        }
+        if (!isEmpty(t)) break;
+      }
+  }
+  if (board[attackingSq] == getKingVal(attackingClr)) {
+    for (int k = 0; k < 8; k++) {
+      int t = attackingSq + dKing[k];
+      if (getManhattanDistance(t, attackingSq) > 2) continue;
+      if (isValidSquare(t) && (isEmpty(t) || isColour(t, 1-attackingClr))) {
+        if (t == attackedSq) return true;
+      }
+    }
+  }
+  if (board[attackingSq] == getKnightVal(attackingClr)) {
+    for (int k = 0; k < 8; k++) {
+      int t = attackingSq + dKnight[k];
+      if (getManhattanDistance(t, attackingSq) != 3) continue;
+      if (isValidSquare(t) && (isEmpty(t) || isColour(t, 1-attackingClr))) {
+        if (t == attackedSq) return true;
+      }
+    }
+  }
+  if (board[attackingSq] == getPawnVal(attackingClr)) {
+    if (getFile(attackingSq) >= 1) {
+      if (attackingClr == WHITE && (attackedSq == attackingSq + 7)) return true;
+      if (attackingClr == BLACK && (attackedSq == attackingSq - 9)) return true;
+    }
+    if (getFile(attackingSq) < 7) {
+      if (attackingClr == WHITE && (attackedSq == attackingSq + 9)) return true;
+      if (attackingClr == BLACK && (attackedSq == attackingSq - 7)) return true;
+    }
+  }
+  return false;
+}
+
+bool Board::inCheck(int clr) {
+  int kingPos = getKingPos(clr);
+
+  for (int i = a1; i <= a8; i++)
+    for (int j = 0; j < 8; j++)
+      if (isColour(i+j, 1-clr) && isAttacked(kingPos, i+j)) 
+        return true;
+
+  return false;
 }
 
 void Board::undoMove() {
@@ -141,11 +220,35 @@ void Board::addMove(Move& m) {
 
 void Board::makeMove(Move& m) {
   undoMoveList.push_back(*this);
+
+  if ((board[m.from] == getPawnVal(WHITE)) && 
+      (m.to - m.from == 16)) {
+    enp_square = (square_type) ((int)m.from + 8);
+  }
+  else if (board[m.from] == getPawnVal(BLACK) && 
+      (m.to - m.from == -16)) {
+    enp_square = (square_type) ((int)m.from - 8);
+  }
+
+  if (board[m.from] == getPawnVal(WHITE) && m.to == enp_square) {
+    board[enp_square - 8] = NO_PIECE;
+  }
+  else if (board[m.from] == getPawnVal(BLACK) && m.to == enp_square) {
+    board[enp_square + 8] = NO_PIECE;
+  }
+
+  board[m.to] = board[m.from];
+  board[m.from] = NO_PIECE;
+
+  if (m.promoted != NO_PIECE) board[m.to] = m.promoted;
+
+  if (turn == WHITE) turn = BLACK;
+  else if (turn == BLACK) turn = WHITE;
 }
 
 bool Board::isMoveValid(Move& m) {
   makeMove(m);
-  bool valid = inCheck();
+  bool valid = inCheck(opp(turn));
   undoMove();
   return !valid;
 }
@@ -404,12 +507,12 @@ void Board::generateKingMoves() {
 
 void Board::generateMoveList() {
   possibleMovesList.clear();
-  //generateKnightMoves();
+  generateKnightMoves();
   generatePawnMoves();
-  //generateKingMoves();
-  //generateBishopMoves();
-  //generateRookMoves();
-  //generateQueenMoves();
+  generateKingMoves();
+  generateBishopMoves();
+  generateRookMoves();
+  generateQueenMoves();
 }
 
 void Board::printMoveList() {

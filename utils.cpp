@@ -12,6 +12,11 @@ string sqtostr(int num) {
   return ret;
 }
 
+int opp(colour_type turn) {
+  if (turn == WHITE) return (int)BLACK;
+  return (int) WHITE;
+}
+
 int getSq(int rank, int file) {
   return 8 * rank + file;
 }

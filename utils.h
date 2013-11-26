@@ -13,5 +13,7 @@ int getRookVal(int);
 int getQueenVal(int);
 int getKingVal(int);
 
+int opp(colour_type turn);
+
 bool isValidSquare(int);
 #endif

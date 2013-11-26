@@ -6,6 +6,7 @@
 using namespace std;
 
 class Move {
+  public:
   square_type from;
   square_type to;
   bool is_capture;
@@ -13,7 +14,6 @@ class Move {
 
   int score;
 
-  public:
   Move(int, int, bool, int promoted=NO_PIECE);
   string getStr();
 };

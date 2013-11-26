@@ -23,7 +23,8 @@ class Board {
   bool isColour(int, int);
   bool isEmpty(int);
 
-  bool inCheck();
+  bool isAttacked(int, int);
+  bool inCheck(int);
 
   void setPositionFromFEN(string);
   void printBoard(bool castle = true, bool enp = true, bool moves = true);
