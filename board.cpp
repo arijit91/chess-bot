@@ -221,6 +221,9 @@ void Board::addMove(Move& m) {
 void Board::makeMove(Move& m) {
   undoMoveList.push_back(*this);
 
+  // special moves
+
+  // enpassant
   if ((board[m.from] == getPawnVal(WHITE)) && 
       (m.to - m.from == 16)) {
     enp_square = (square_type) ((int)m.from + 8);
@@ -240,7 +243,16 @@ void Board::makeMove(Move& m) {
   board[m.to] = board[m.from];
   board[m.from] = NO_PIECE;
 
+  // promotion
   if (m.promoted != NO_PIECE) board[m.to] = m.promoted;
+
+  //castling
+  if (board[m.to] == getKingVal(turn) && abs(m.from - m.to) == 2) {
+    if (m.from == e1 && m.to == g1) { board[h1] = NO_PIECE; board[f1] = WR; }
+    if (m.from == e1 && m.to == c1) { board[a1] = NO_PIECE; board[d1] = WR; }
+    if (m.from == e8 && m.to == g8) { board[h8] = NO_PIECE; board[f8] = BR; }
+    if (m.from == e8 && m.to == c8) { board[a8] = NO_PIECE; board[d8] = BR; }
+  }
 
   if (turn == WHITE) turn = BLACK;
   else if (turn == BLACK) turn = WHITE;
@@ -505,6 +517,101 @@ void Board::generateKingMoves() {
   }
 }
 
+void Board::generateCastlingMoves() {
+  int pos = getKingPos(turn);
+
+  if (turn == WHITE) {
+    if (castle_rights.test(0)) {
+      int kPos = getKingPos(turn);
+      assert(kPos == e1);
+      // king side castling
+      bool f = true;
+      if (!(isEmpty(f1) && isEmpty(g1))) f = false;
+      for (int i = a1; i <= a8; i++)
+        for (int j = 0; j < 8; j++)
+          if (isColour(i+j, 1-turn))
+            if (isAttacked(e1, i+j) || isAttacked(f1, i+j) || isAttacked(g1, i+j)) {
+              f = false;
+              break;
+            }
+      if (f) {
+        Move m(e1, g1, false);
+        bool ok = isMoveValid(m);
+        assert(ok);
+        if (isMoveValid(m)) {
+          addMove(m);
+        }
+      }
+    }
+    if (castle_rights.test(1)) {
+      int kPos = getKingPos(turn);
+      assert(kPos == e1);
+      bool f = true;
+      if (!(isEmpty(d1) && isEmpty(c1) && isEmpty(b1))) f = false;
+      for (int i = a1; i <= a8; i++)
+        for (int j = 0; j < 8; j++)
+          if (isColour(i+j, 1-turn))
+            if (isAttacked(e1, i+j) || isAttacked(d1, i+j) || isAttacked(c1, i+j)) {
+              f = false;
+              break;
+            }
+      if (f) {
+        Move m(e1, c1, false);
+        bool ok = isMoveValid(m);
+        assert(ok);
+        if (isMoveValid(m)) {
+          addMove(m);
+        }
+      }
+    }
+  }
+  else {
+    if (castle_rights.test(2)) {
+      int kPos = getKingPos(turn);
+      assert(kPos == e8);
+      // king side castling
+      bool f = true;
+      if (!(isEmpty(f8) && isEmpty(g8))) f = false;
+      for (int i = a1; i <= a8; i++)
+        for (int j = 0; j < 8; j++)
+          if (isColour(i+j, 1-turn))
+            if (isAttacked(e8, i+j) || isAttacked(f8, i+j) || isAttacked(g8, i+j)) {
+              f = false;
+              break;
+            }
+      if (f) {
+        Move m(e8, g8, false);
+        bool ok = isMoveValid(m);
+        assert(ok);
+        if (isMoveValid(m)) {
+          addMove(m);
+        }
+      }
+    }
+    if (castle_rights.test(3)) {
+      int kPos = getKingPos(turn);
+      assert(kPos == e8);
+      bool f = true;
+      if (!(isEmpty(d8) && isEmpty(c8) && isEmpty(b8))) f = false;
+      for (int i = a1; i <= a8; i++)
+        for (int j = 0; j < 8; j++)
+          if (isColour(i+j, 1-turn))
+            if (isAttacked(e8, i+j) || isAttacked(d8, i+j) || isAttacked(c8, i+j)) {
+              f = false;
+              break;
+            }
+      if (f) {
+        Move m(e8, c8, false);
+        bool ok = isMoveValid(m);
+        assert(ok);
+        if (isMoveValid(m)) {
+          addMove(m);
+        }
+      }
+    }
+  }
+}
+
 void Board::generateMoveList() {
   possibleMovesList.clear();
   generateKnightMoves();
@@ -513,6 +620,7 @@ void Board::generateMoveList() {
   generateBishopMoves();
   generateRookMoves();
   generateQueenMoves();
+  generateCastlingMoves();
 }
 
 void Board::printMoveList() {
@@ -525,6 +633,12 @@ void Board::printMoveList() {
 string Board::getMove() {
   generateMoveList();
   int sz = possibleMovesList.size();
+  //for (int i = 0 ; i < sz; i++) {
+  //  Move m = possibleMovesList[i];
+  //  if (board[m.from] == getKingVal(turn) && abs(m.from - m.to) == 2) {
+  //    return m.getStr();
+  //  }
+  //}
   Move m = possibleMovesList[rand()%sz];
   return m.getStr();
 }

@@ -36,6 +36,7 @@ class Board {
   void generateQueenMoves();
   void generatePawnMoves();
   void generateKingMoves();
+  void generateCastlingMoves();
   void makeMove(Move&);
   void undoMove();
   void printMoveList();
