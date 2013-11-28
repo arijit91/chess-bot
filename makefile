@@ -1,4 +1,4 @@
 make: all
 
 all:
-	g++ main.cpp board.cpp move.cpp utils.cpp
+	g++ main.cpp board.cpp move.cpp utils.cpp -O2

@@ -19,7 +19,6 @@ class Board {
   int halfmove;
   int fullmove;
   vector<Move> possibleMovesList;
-  vector<Board> undoMoveList;
 
   int max_depth;
 
@@ -44,11 +43,16 @@ class Board {
   void generateCastlingMoves();
   void makeMove(Move&);
   void undoMove();
+  void printPossibleMoves(string);
   void printMoveList();
   void addMove(Move&);
   bool isMoveValid(Move&);
 
+  int perft(int);
+
   int evaluate();
+  int evalFEN(string);
+  int completeSearch(int);
   int alpha_beta(int, int, int);
   string iterativeDeepening();
   string getMove();
