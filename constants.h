@@ -5,6 +5,8 @@ using namespace std;
 
 #define NAME "Balrog"
 
+#define INF 1000000000
+
 enum piece_type {WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK, NO_PIECE};
 
 enum square_type {

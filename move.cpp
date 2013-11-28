@@ -2,8 +2,8 @@
 #include<cassert>
 #include<string>
 
-#include "move.h"
 #include "board.h"
+#include "move.h"
 #include "utils.h"
 using namespace std;
 

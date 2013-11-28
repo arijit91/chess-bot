@@ -1,5 +1,8 @@
 #ifndef UTILS_H_
 #define UTILS_H
+
+#include"constants.h"
+
 string sqtostr(int);
 
 int getManhattanDistance(int, int);

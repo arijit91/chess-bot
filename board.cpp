@@ -11,6 +11,10 @@ using namespace std;
 int dKnight[8] = {-17, -15, -10, -6, 6, 10, 15, 17};
 int dKing[8] = {-9, -8, -7, -1, 1, 7, 8, 9};
 
+int piece_values[13] = {1, 3, 3, 5, 9, 1000, 1, 3, 3, 5, 9, 1000, 0};
+
+string bestmoves[1005];
+
 void Board::setPositionFromFEN(string fenString) {
   map<char, piece_type> M;
   char c;
@@ -113,7 +117,7 @@ void Board::printBoard(bool castle, bool enp, bool moves) {
 }
 
 int Board::getKingPos(int clr) {
-  for (int i = a1; i <= a8; i++) {
+  for (int i = a1; i <= a8; i+=8) {
     for (int j = 0; j < 8; j++) {
       if (board[i+j] == getKingVal(clr))
         return (i+j);
@@ -201,7 +205,7 @@ bool Board::isAttacked(int attackedSq, int attackingSq) {
 bool Board::inCheck(int clr) {
   int kingPos = getKingPos(clr);
 
-  for (int i = a1; i <= a8; i++)
+  for (int i = a1; i <= a8; i+=8)
     for (int j = 0; j < 8; j++)
       if (isColour(i+j, 1-clr) && isAttacked(kingPos, i+j)) 
         return true;
@@ -271,13 +275,13 @@ bool Board::isEmpty(int sq) {
 
 bool Board::isColour(int sq, int clr) {
   int c = board[sq];
-  if (clr == WHITE && (c >= 0 && c<= 5)) return true;
+  if (clr == WHITE && (c >= 0 && c <= 5)) return true;
   if (clr == BLACK && (c >= 6 && c <= 11)) return true;
   return false;
 }
 
 void Board::generateKnightMoves() {
-  for (int i = a1; i <= a8; i++) {
+  for (int i = a1; i <= a8; i+=8) {
     for (int j = 0; j < 8; j++) {
       if (board[i+j] == getKnightVal(turn)) {
         for (int k = 0; k < 8; k++) {
@@ -297,7 +301,7 @@ void Board::generateKnightMoves() {
 }
 
 void Board::generateBishopMoves() {
-  for (int i = a1; i <= a8; i++)
+  for (int i = a1; i <= a8; i+=8)
     for (int j = 0; j < 8; j++)
       if (board[i+j] == getBishopVal(turn))
         for (int k = 0; k < 4; k++)
@@ -323,7 +327,7 @@ void Board::generateBishopMoves() {
 }
 
 void Board::generateRookMoves() {
-  for (int i = a1; i <= a8; i++)
+  for (int i = a1; i <= a8; i+=8)
     for (int j = 0; j < 8; j++)
       if (board[i+j] == getRookVal(turn))
         for (int k = 0; k < 4; k++)
@@ -351,7 +355,7 @@ void Board::generateRookMoves() {
 }
 
 void Board::generateQueenMoves() {
-  for (int i = a1; i <= a8; i++)
+  for (int i = a1; i <= a8; i+=8)
     for (int j = 0; j < 8; j++)
       if (board[i+j] == getQueenVal(turn))
         for (int k = 0; k < 4; k++)
@@ -376,7 +380,7 @@ void Board::generateQueenMoves() {
             }
             if (!isEmpty(t)) break;
           }
-  for (int i = a1; i <= a8; i++)
+  for (int i = a1; i <= a8; i+=8)
     for (int j = 0; j < 8; j++)
       if (board[i+j] == getQueenVal(turn))
         for (int k = 0; k < 4; k++)
@@ -403,7 +407,7 @@ void Board::generateQueenMoves() {
 
 void Board::generatePawnMoves() {
   vector<Move> moves;
-  for (int i = a1; i <= a8; i++) {
+  for (int i = a1; i <= a8; i+=8) {
     for (int j = 0; j < 8; j++) {
       int sq = i+j;
       if (board[sq] == getPawnVal(turn)) {
@@ -498,7 +502,7 @@ void Board::generatePawnMoves() {
 }
 
 void Board::generateKingMoves() {
-  for (int i = a1; i <= a8; i++) {
+  for (int i = a1; i <= a8; i+=8) {
     for (int j = 0; j < 8; j++) {
       if (board[i+j] == getKingVal(turn)) {
         for (int k = 0; k < 8; k++) {
@@ -527,7 +531,7 @@ void Board::generateCastlingMoves() {
       // king side castling
       bool f = true;
       if (!(isEmpty(f1) && isEmpty(g1))) f = false;
-      for (int i = a1; i <= a8; i++)
+      for (int i = a1; i <= a8; i+=8)
         for (int j = 0; j < 8; j++)
           if (isColour(i+j, 1-turn))
             if (isAttacked(e1, i+j) || isAttacked(f1, i+j) || isAttacked(g1, i+j)) {
@@ -548,7 +552,7 @@ void Board::generateCastlingMoves() {
       assert(kPos == e1);
       bool f = true;
       if (!(isEmpty(d1) && isEmpty(c1) && isEmpty(b1))) f = false;
-      for (int i = a1; i <= a8; i++)
+      for (int i = a1; i <= a8; i+=8)
         for (int j = 0; j < 8; j++)
           if (isColour(i+j, 1-turn))
             if (isAttacked(e1, i+j) || isAttacked(d1, i+j) || isAttacked(c1, i+j)) {
@@ -572,7 +576,7 @@ void Board::generateCastlingMoves() {
       // king side castling
       bool f = true;
       if (!(isEmpty(f8) && isEmpty(g8))) f = false;
-      for (int i = a1; i <= a8; i++)
+      for (int i = a1; i <= a8; i+=8)
         for (int j = 0; j < 8; j++)
           if (isColour(i+j, 1-turn))
             if (isAttacked(e8, i+j) || isAttacked(f8, i+j) || isAttacked(g8, i+j)) {
@@ -593,7 +597,7 @@ void Board::generateCastlingMoves() {
       assert(kPos == e8);
       bool f = true;
       if (!(isEmpty(d8) && isEmpty(c8) && isEmpty(b8))) f = false;
-      for (int i = a1; i <= a8; i++)
+      for (int i = a1; i <= a8; i+=8)
         for (int j = 0; j < 8; j++)
           if (isColour(i+j, 1-turn))
             if (isAttacked(e8, i+j) || isAttacked(d8, i+j) || isAttacked(c8, i+j)) {
@@ -630,15 +634,62 @@ void Board::printMoveList() {
   }
 }
 
-string Board::getMove() {
+int Board::evaluate() {
+  int ret = 0;
+  for (int i = a1; i <= a8; i+=8) {
+    for (int j = 0; j < 8; j++) {
+      int sign = 1;
+      if (board[i+j] >= 0 && board[i+j] <= 5 && turn == BLACK) sign = -1;
+      if (board[i+j] >= 6 && board[i+j] <= 11 && turn == WHITE) sign = -1;
+      ret += sign * piece_values[board[i+j]];
+    }
+  }
+  return ret;
+}
+
+int Board::alpha_beta(int alpha, int beta, int depth) {
+  if (depth == 0) {
+    return evaluate();
+  }
   generateMoveList();
-  int sz = possibleMovesList.size();
-  //for (int i = 0 ; i < sz; i++) {
-  //  Move m = possibleMovesList[i];
-  //  if (board[m.from] == getKingVal(turn) && abs(m.from - m.to) == 2) {
-  //    return m.getStr();
-  //  }
-  //}
-  Move m = possibleMovesList[rand()%sz];
-  return m.getStr();
+  vector<string> good_moves;
+  for (int i = 0; i < possibleMovesList.size(); i++) {
+    Move m = possibleMovesList[i];
+    makeMove(m);
+    int score = -alpha_beta(-beta, -alpha, depth - 1);
+    undoMove();
+
+    if (score >= alpha) {
+      if (score > alpha) {
+        bestmoves[depth] = m.getStr();
+        good_moves.clear();
+      }
+      else {
+        good_moves.push_back(m.getStr());
+      }
+      alpha = score;
+    }
+  }
+  // choose a random move if all moves are equally good
+  int sz = good_moves.size();
+  if (sz > 0) {
+    bestmoves[depth] = good_moves[rand()%sz];
+  }
+  return alpha;
+}
+
+string Board::iterativeDeepening() {
+  max_depth = 1;
+  for (int i = 1; i <= max_depth; i++) {
+    int score = alpha_beta(-INF, INF, i);
+  }
+  return bestmoves[max_depth];
+}
+
+string Board::getMove() {
+  return iterativeDeepening();
+  //generateMoveList();
+  //int sz = possibleMovesList.size();
+  //Move m = possibleMovesList[rand()%sz];
+  //return m.getStr();
 }

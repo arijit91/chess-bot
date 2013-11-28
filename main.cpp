@@ -6,7 +6,6 @@
 #include<ctime>
 #include<cstdlib>
 
-#include"constants.h"
 #include"board.h"
 using namespace std;
 
@@ -48,6 +47,7 @@ void UciLoop() {
         } else if (!strncmp(line, "position", 8)) {
             setupBoard(string(line));
         } else if (!strncmp(line, "ucinewgame", 10)) {
+            board.setPositionFromFEN(startFEN);
         } else if (!strncmp(line, "go", 2)) {
             go(string(line));
         } else if (!strncmp(line, "quit", 4)) {
