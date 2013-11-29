@@ -30,6 +30,8 @@ class Board {
   bool isAttacked(int, int);
   bool inCheck(int);
 
+  Move getMoveFromString(string);
+  void addMovesToPosition(string, string);
   void setPositionFromFEN(string);
   void printBoard(bool castle = true, bool enp = true, bool moves = true);
 

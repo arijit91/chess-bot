@@ -1,8 +1,14 @@
 #include<cmath>
+#include<cassert>
 #include<string>
 
 #include"utils.h"
 using namespace std;
+
+int strtosq(string s) {
+  assert(s.size() == 2);
+  return 8 * (s[1] - '1') + (s[0] - 'a');
+}
 
 string sqtostr(int num) {
   if (num == NO_SQUARE) return "None";

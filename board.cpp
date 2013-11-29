@@ -85,6 +85,45 @@ void Board::setPositionFromFEN(string fenString) {
   fullmove = fm;
 }
 
+Move Board::getMoveFromString(string str) {
+  int from = strtosq(str.substr(0, 2));
+  int to = strtosq(str.substr(2, 2));
+
+  int promotion = NO_PIECE;
+  if (str.size() > 4) {
+    assert(str.size() == 5);
+    if (str[4] == 'q') promotion = getQueenVal(turn);
+    if (str[4] == 'r') promotion = getRookVal(turn);
+    if (str[4] == 'b') promotion = getBishopVal(turn);
+    if (str[4] == 'n') promotion = getKnightVal(turn);
+  }
+  return Move(from, to, false, (piece_type) promotion);
+}
+
+void Board::addMovesToPosition(string fen, string s) {
+  string moves = s.substr(23);
+  setPositionFromFEN(fen);
+  int i = 0;
+  while(1) {
+    string move = "";
+    while (i < moves.size() && (moves[i] == ' ' || moves[i] == '\n')) {
+      i++;
+    }
+    if (i == moves.size()) break;
+
+    while (i < moves.size() && moves[i] != ' ' && moves[i] != '\n') {
+      move += moves[i];
+      i++;
+    }
+    if (i == moves.size()) break;
+
+    Move m = getMoveFromString(move);
+    makeMove(m);
+  }
+  return ;
+}
+
+
 void Board::printBoard(bool castle, bool enp, bool moves) {
   map<int, char> M;
   M[WP] = 'P', M[WN] = 'N', M[WB] = 'B', M[WR] = 'R', M[WQ] = 'Q',
@@ -784,7 +823,7 @@ string Board::iterativeDeepening() {
   //for (int i = 1; i <= max_depth; i++) {
   //  int score = alpha_beta(-INF, INF, i);
   //}
-  max_depth = 1;
+  max_depth = 4;
 
   vector<string> options;
   int best = -INF;

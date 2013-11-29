@@ -4,6 +4,7 @@
 using namespace std;
 
 #define NAME "Balrog"
+#define AUTHOR "Mithrandir"
 
 #define INF 1000000000
 

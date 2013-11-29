@@ -1,4 +1,5 @@
 #include<iostream>
+#include<fstream>
 #include<cassert>
 #include<string>
 #include<cstdio>
@@ -19,6 +20,7 @@ string pos7FEN = "8/3K4/2p5/p2b2r1/5k2/8/8/1q6 b - - 1 67";
 string wideopenperftFEN = "rnbqkbnr/8/8/8/8/8/8/RNBQKBNR w KQkq - 0 1";
 
 Board board;
+bool quit_game = false;
 
 void setupBoard(string s) {
   assert(s.substr(0, 13) == "position fen ");
@@ -37,9 +39,12 @@ void UciLoop() {
 
 	char line[500];
     printf("id name %s\n", NAME);
+    printf("id author %s\n", AUTHOR);
     printf("uciok\n");
 	
 	int MB = 64;
+
+  fstream of("/home/arijit/out", ios::out);
 
 	while (1) {
 		memset(&line[0], 0, sizeof(line));
@@ -49,32 +54,44 @@ void UciLoop() {
         if (line[0] == '\n')
         continue;
 
+        of.write(line, 500);
+        of.flush();
+
         if (!strncmp(line, "isready", 7)) {
             printf("readyok\n");
-        } else if (!strncmp(line, "position", 8)) {
+        } 
+        else if (!strncmp(line, "position startpos moves", 23)) {
+            board.addMovesToPosition(startFEN, string(line));
+        }
+        else if (!strncmp(line, "position startpos", 17)) {
+            board.setPositionFromFEN(startFEN);
+        }
+        else if (!strncmp(line, "position", 8)) {
             setupBoard(string(line));
         } else if (!strncmp(line, "ucinewgame", 10)) {
             board.setPositionFromFEN(startFEN);
         } else if (!strncmp(line, "go", 2)) {
             go(string(line));
         } else if (!strncmp(line, "quit", 4)) {
+            quit_game = true;
             break;
-        } else if (!strncmp(line, "evalfen", 7)) {
+        } else if (!strncmp(line, "print", 5)) {
+            board.printBoard();
+        }
+        else if (!strncmp(line, "evalfen", 7)) {
             int ret = board.evalFEN(string(line));
-            cout<<"Evaluation: "<<ret<<endl;
-            break;
+            printf("Evaluation: %d\n", ret);
         } else if (!strncmp(line, "uci", 3)) {
             printf("id name %s\n", NAME);
+            printf("id author %s\n", AUTHOR);
             printf("uciok\n");
-        } else if (!strncmp(line, "debug", 4)) {
-            //DebugAnalysisTest(pos,info);
         } 
+        if (quit_game) break;
 		}
 }
 
 int main() {
   srand(time(0));
-  
   //board.setPositionFromFEN(startFEN);
   //board.setPositionFromFEN(pos7FEN);
   //board.setPositionFromFEN(wideopenperftFEN);

@@ -3,6 +3,7 @@
 
 #include"constants.h"
 
+int strtosq(string);
 string sqtostr(int);
 
 int getManhattanDistance(int, int);
