@@ -42,6 +42,7 @@ class Board {
   void printBoard(bool castle = true, bool enp = true, bool moves = true);
 
   void generateMoveList();
+  void orderMoveList();
   void generateKnightMoves();
   void generateBishopMoves();
   void generateRookMoves();
