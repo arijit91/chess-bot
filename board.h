@@ -9,6 +9,11 @@
 #include"constants.h"
 using namespace std;
 
+struct Line {
+  int numMoves;
+  Move argmove[30];
+};
+
 // class that does everything
 // maybe i shouldn't have called it board
 class Board {
@@ -31,6 +36,7 @@ class Board {
   bool inCheck(int);
 
   Move getMoveFromString(string);
+  void makeInputMove(string);
   void addMovesToPosition(string, string);
   void setPositionFromFEN(string);
   void printBoard(bool castle = true, bool enp = true, bool moves = true);
@@ -55,7 +61,7 @@ class Board {
   int evaluate();
   int evalFEN(string);
   int completeSearch(int);
-  int alpha_beta(int, int, int);
+  int alpha_beta(int, int, int, Line*);
   string iterativeDeepening();
   string getMove();
 

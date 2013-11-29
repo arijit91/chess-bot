@@ -44,7 +44,7 @@ void UciLoop() {
 	
 	int MB = 64;
 
-  fstream of("/home/arijit/out", ios::out);
+  //fstream of("of", ios::out);
 
 	while (1) {
 		memset(&line[0], 0, sizeof(line));
@@ -54,8 +54,8 @@ void UciLoop() {
         if (line[0] == '\n')
         continue;
 
-        of.write(line, 500);
-        of.flush();
+        //of.write(line, 500);
+        //of.flush();
 
         if (!strncmp(line, "isready", 7)) {
             printf("readyok\n");
@@ -72,6 +72,8 @@ void UciLoop() {
             board.setPositionFromFEN(startFEN);
         } else if (!strncmp(line, "go", 2)) {
             go(string(line));
+        } else if (!strncmp(line, "makemove", 8)) {
+            board.makeInputMove(string(line).substr(9));
         } else if (!strncmp(line, "quit", 4)) {
             quit_game = true;
             break;
@@ -80,6 +82,9 @@ void UciLoop() {
         }
         else if (!strncmp(line, "evalfen", 7)) {
             int ret = board.evalFEN(string(line));
+            printf("Evaluation: %d\n", ret);
+        } else if (!strncmp(line, "eval", 2)) {
+            int ret = board.evaluate();
             printf("Evaluation: %d\n", ret);
         } else if (!strncmp(line, "uci", 3)) {
             printf("id name %s\n", NAME);

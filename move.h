@@ -15,6 +15,11 @@ class Move {
 
   int score;
 
+  Move() {
+    from = to = NO_SQUARE;
+    is_capture = false;
+    promoted = NO_PIECE;
+  }
   Move(int, int, bool, int promoted=NO_PIECE);
   string getStr();
 };

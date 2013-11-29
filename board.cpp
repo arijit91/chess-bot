@@ -1,6 +1,7 @@
 #include<iostream>
 #include<map>
 #include<cassert>
+#include<cstring>
 #include<cstdlib>
 #include<cstdio>
 
@@ -11,7 +12,7 @@ using namespace std;
 int dKnight[8] = {-17, -15, -10, -6, 6, 10, 15, 17};
 int dKing[8] = {-9, -8, -7, -1, 1, 7, 8, 9};
 
-int piece_values[13] = {1, 3, 3, 5, 9, 1000, 1, 3, 3, 5, 9, 1000, 0};
+int piece_values[13] = {1, 3, 3, 5, 9, 1000, -1, -3, -3, -5, -9, -1000, 0};
 
 string bestmoves[1005];
 vector<Board> undoMoveList;
@@ -154,6 +155,7 @@ void Board::printBoard(bool castle, bool enp, bool moves) {
     cout<<"Halfmove: "<<halfmove<<endl;
     cout<<"Fullmove: "<<fullmove<<endl;
   }
+  cout<<"Turn: "<<turn<<endl;
 }
 
 int Board::getKingPos(int clr) {
@@ -255,7 +257,16 @@ bool Board::inCheck(int clr) {
 
 void Board::undoMove() {
   assert(undoMoveList.size() > 0);
-  *this = undoMoveList.back();
+  Board old = undoMoveList.back();
+  for (int i = 0; i < 64; i++) {
+    this->board[i] = old.board[i];
+  }
+  this->enp_square = old.enp_square;
+  this->castle_rights = old.castle_rights;
+  this->turn = old.turn;
+  this->halfmove = old.halfmove;
+  this->fullmove = old.fullmove;
+  this->possibleMovesList = old.possibleMovesList;
   undoMoveList.pop_back();
 }
 
@@ -721,9 +732,7 @@ int Board::evaluate() {
   int ret = 0;
   for (int i = a1; i <= a8; i+=8) {
     for (int j = 0; j < 8; j++) {
-      int sign = 1;
-      if (board[i+j] >= 6 && board[i+j] <= 11) sign = -1;
-      ret += sign * piece_values[board[i+j]];
+      ret += piece_values[board[i+j]];
     }
   }
   return ret;
@@ -771,18 +780,21 @@ int Board::completeSearch(int depth) {
   return ret;
 }
 
-int Board::alpha_beta(int alpha, int beta, int depth) {
+int Board::alpha_beta(int alpha, int beta, int depth, Line* pl) {
+  Line line;
   if (depth == 0) {
+    pl->numMoves = 0;
     int val = evaluate();
     if (turn == BLACK) val *= -1;
     return val;
   }
   generateMoveList();
   bool ok = false;
-  for (int i = 0; i < possibleMovesList.size(); i++) {
+  int sz = possibleMovesList.size();
+  for (int i = 0; i < sz; i++) {
     Move m = possibleMovesList[i];
     makeMove(m);
-    int score = -alpha_beta(-beta, -alpha, depth - 1);
+    int score = -alpha_beta(-beta, -alpha, depth - 1, &line);
     undoMove();
 
     if (score >= beta) {
@@ -792,6 +804,12 @@ int Board::alpha_beta(int alpha, int beta, int depth) {
     if (score > alpha) {
       ok = true;
       alpha = score;
+      pl->argmove[0] = m;
+      //memcpy(pl->argmove + 1, line.argmove, line.numMoves * sizeof(Move));
+      for (int i = 0; i < line.numMoves; i++) {
+        pl->argmove[i+1] = line.argmove[i];
+      }
+      pl->numMoves = line.numMoves + 1; 
     }
   }
   if (!ok) {
@@ -800,6 +818,11 @@ int Board::alpha_beta(int alpha, int beta, int depth) {
     return 0;
   }
   return alpha;
+}
+
+void Board::makeInputMove(string inputMove) {
+  Move m = getMoveFromString(inputMove);
+  makeMove(m);
 }
 
 int Board::evalFEN(string FEN) {
@@ -818,34 +841,45 @@ void Board::printPossibleMoves(string FEN) {
 
 string Board::iterativeDeepening() {
   //completeSearch(max_depth);
-
-  //max_depth = 2;
-  //for (int i = 1; i <= max_depth; i++) {
-  //  int score = alpha_beta(-INF, INF, i);
-  //}
+  //
+  Line l;
+  //int score = alpha_beta(-INF, INF, 4, &l);
   max_depth = 4;
-
-  vector<string> options;
-  int best = -INF;
-
-  generateMoveList();
-
-  for (int i = 0; i < possibleMovesList.size(); i++) {
-    Move m = possibleMovesList[i];
-    makeMove(m);
-    int score = -alpha_beta(-INF, INF, max_depth - 1);
-    undoMove();
-
-    if (score > best) {
-      best = score;
-      options.clear();
-      options.push_back(m.getStr());
-    }
-    else if (score == best) {
-      options.push_back(m.getStr());
-    }
+  for (int i = 0; i <= max_depth; i++) {
+    int score = alpha_beta(-INF, INF, i, &l);
+    printf("info score cp %d depth %d\n", score, i);
   }
-  return options[rand()%(options.size())];
+
+  //printf("pv");
+  //for (int i = 0; i < max_depth; i++) {
+  //  if (l.argmove[i].from >= 64 || l.argmove[i].to >= 64) break;
+  //  printf(" %s", l.argmove[i].getStr().c_str());
+  //}
+  //printf("\n");
+  return l.argmove[0].getStr();
+
+  //max_depth = 6;
+  //vector<string> options;
+  //int best = -INF;
+
+  //generateMoveList();
+
+  //for (int i = 0; i < possibleMovesList.size(); i++) {
+  //  Move m = possibleMovesList[i];
+  //  makeMove(m);
+  //  int score = -alpha_beta(-INF, INF, max_depth - 1);
+  //  undoMove();
+
+  //  if (score > best) {
+  //    best = score;
+  //    options.clear();
+  //    options.push_back(m.getStr());
+  //  }
+  //  else if (score == best) {
+  //    options.push_back(m.getStr());
+  //  }
+  //}
+  //return options[rand()%(options.size())];
 }
 
 string Board::getMove() {
