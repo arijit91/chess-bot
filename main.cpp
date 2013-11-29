@@ -6,6 +6,7 @@
 #include<cstring>
 #include<ctime>
 #include<cstdlib>
+#include<math.h>
 
 #include"board.h"
 using namespace std;
@@ -95,15 +96,55 @@ void UciLoop() {
 		}
 }
 
-void train() {
+void tdUpdate(Board state, Board nextState, float reward, int wt[], float eta, bool gameover) {
+  int numFeatures = 5;
+  float r=0;
+  int features[] = {0,0,0,0,0};
+  float V = state.evaluationFunction(wt);
+  float value = 0;
+ 
+  //Check if game is over
+  if(gameover)
+    r = reward - V;
+  else
+    r = reward + nextState.evaluationFunction(wt) - V;
+  state.extractFeatures(features);
+  for(int i=0; i<numFeatures; i++)
+    value += wt[i]*features[i];
   
-  setupBoard(startFEN);
-  //char movelist[][10] = ["d4","d5","Nf3", "Nf6", "Nbd2", "e6", "a3", "c5", "dxc5", "Bxc5", "b4", "Bxf2", "Kxf2", "Ng4+", "Kg3", "h5", "Nh4", "Qc7+", "Kf3", "Qc3+", "Kf4", "Qe3"];
+  float delV[] = {0.0,0.0,0.0,0.0,0.0};
+  for(int i=0; i<numFeatures; i++)
+    delV[i] = features[i]*exp(-1*value)*V*V;
+  
+  for(int i=0; i<numFeatures; i++)
+    wt[i] += eta*r*delV[i];
+}
 
+void train() {
+ 
+  /*
+   * Have a list of games. Each game has a movelist. 
+   * wt = [0,0,0,0,0]
+   * Iterate over the games
+   *    Set start postition
+   *    Iterate over the movelists
+   *        state = current board state
+   *        if state.checkmate or state.draw:
+   *            call TD Update with (state, NULL, win/loss/draw, eta, 1)
+   *        else:
+   *            Apply move
+   *            nextstate = board 
+   *            Call TD Update with (state, nextstate, 0, eta, 0)
+   */
+  board.setPositionFromFEN(startFEN);
+  board.printBoard(0,0,0);
+  string movelist[] = {"d4","d5","Nf3", "Nf6", "Nbd2", "e6", "a3", "c5", "dxc5", "Bxc5", "b4", "Bxf2", "Kxf2", "Ng4+", "Kg3", "h5", "Nh4", "Qc7+", "Kf3", "Qc3+", "Kf4", "Qe3"};
 }
 
 
 int main() {
+  //train();
+  
   srand(time(0));
   //board.setPositionFromFEN(startFEN);
   //board.setPositionFromFEN(pos7FEN);
@@ -126,5 +167,6 @@ int main() {
       return -1;
     }
   }
+
   return 0;
 }

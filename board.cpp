@@ -5,6 +5,7 @@
 #include<cstring>
 #include<cstdlib>
 #include<cstdio>
+#include<math.h>
 
 #include "board.h"
 #include "utils.h"
@@ -963,6 +964,6 @@ float Board::evaluationFunction(int weights[]) {
   extractFeatures(features);
   for(int i=0; i<5; i++)
       value += features[i]*weights[i];
-  return value;
+  return 1.0/(1+exp(value*-1));
 }
 
