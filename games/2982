@@ -1,0 +1,35 @@
+1
+33
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1
+rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2
+rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2
+rnbqkbnr/pp1p1ppp/4p3/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3
+rnbqkbnr/pp1p1ppp/4p3/2p5/4P3/5NP1/PPPP1P1P/RNBQKB1R b KQkq - 0 3
+rnbqkbnr/p2p1ppp/1p2p3/2p5/4P3/5NP1/PPPP1P1P/RNBQKB1R w KQkq - 0 4
+rnbqkbnr/p2p1ppp/1p2p3/2p5/4P3/5NP1/PPPP1PBP/RNBQK2R b KQkq - 1 4
+rn1qkbnr/pb1p1ppp/1p2p3/2p5/4P3/5NP1/PPPP1PBP/RNBQK2R w KQkq - 2 5
+rn1qkbnr/pb1p1ppp/1p2p3/2p5/4P3/5NP1/PPPPQPBP/RNB1K2R b KQkq - 3 5
+rn1qkbnr/pb3ppp/1p1pp3/2p5/4P3/5NP1/PPPPQPBP/RNB1K2R w KQkq - 0 6
+rn1qkbnr/pb3ppp/1p1pp3/2p5/3PP3/5NP1/PPP1QPBP/RNB1K2R b KQkq - 0 6
+rn1qkbnr/pb3ppp/1p1pp3/8/3pP3/5NP1/PPP1QPBP/RNB1K2R w KQkq - 0 7
+rn1qkbnr/pb3ppp/1p1pp3/8/3NP3/6P1/PPP1QPBP/RNB1K2R b KQkq - 0 7
+rn1qkb1r/pb3ppp/1p1ppn2/8/3NP3/6P1/PPP1QPBP/RNB1K2R w KQkq - 1 8
+rn1qkb1r/pb3ppp/1p1ppn2/8/3NP3/6P1/PPP1QPBP/RNB2RK1 b kq - 2 8
+r2qkb1r/pb1n1ppp/1p1ppn2/8/3NP3/6P1/PPP1QPBP/RNB2RK1 w kq - 3 9
+r2qkb1r/pb1n1ppp/1p1ppn2/8/3NP3/6P1/PPP1QPBP/RNBR2K1 b kq - 4 9
+r2qkb1r/1b1n1ppp/pp1ppn2/8/3NP3/6P1/PPP1QPBP/RNBR2K1 w kq - 0 10
+r2qkb1r/1b1n1ppp/pp1ppn2/4P3/3N4/6P1/PPP1QPBP/RNBR2K1 b kq - 0 10
+r2qkb1r/3n1ppp/pp1ppn2/4P3/3N4/6P1/PPP1QPbP/RNBR2K1 w kq - 0 11
+r2qkb1r/3n1ppp/pp1ppP2/8/3N4/6P1/PPP1QPbP/RNBR2K1 b kq - 0 11
+r2qkb1r/3n1ppp/pp1ppP2/8/3N4/6Pb/PPP1QP1P/RNBR2K1 w kq - 1 12
+r2qkb1r/3n1ppp/pp1ppP2/7Q/3N4/6Pb/PPP2P1P/RNBR2K1 b kq - 2 12
+r3kb1r/3n1ppp/pp1ppq2/7Q/3N4/6Pb/PPP2P1P/RNBR2K1 w kq - 0 13
+r3kb1r/3n1ppp/pp1ppq2/8/3N4/6PQ/PPP2P1P/RNBR2K1 b kq - 0 13
+r3k2r/3nbppp/pp1ppq2/8/3N4/6PQ/PPP2P1P/RNBR2K1 w kq - 1 14
+r3k2r/3nbppp/pp1ppq2/8/3N4/2N3PQ/PPP2P1P/R1BR2K1 b kq - 2 14
+r3k2r/3nbppp/pp1pp1q1/8/3N4/2N3PQ/PPP2P1P/R1BR2K1 w kq - 3 15
+r3k2r/3nbppp/ppNpp1q1/8/8/2N3PQ/PPP2P1P/R1BR2K1 b kq - 4 15
+r3k2r/4bppp/ppNpp1q1/4n3/8/2N3PQ/PPP2P1P/R1BR2K1 w kq - 5 16
+r3k2r/4Nppp/pp1pp1q1/4n3/8/2N3PQ/PPP2P1P/R1BR2K1 b kq - 0 16
+r6r/4kppp/pp1pp1q1/4n3/8/2N3PQ/PPP2P1P/R1BR2K1 w - - 0 17

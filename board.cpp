@@ -940,23 +940,23 @@ void Board::extractFeatures(int features[]) {
     }
   }
 
-  if(turn==WHITE) {
+//  if(turn==WHITE) {
     features[0] = wp-bp;
     features[1] = wr-br;
     features[2] = wb-bb;
     features[3] = wn-bn;
     features[4] = wq-bq;
-  }
-  else if(turn==BLACK) {
-    features[0] = -wp+bp;
-    features[1] = -wr+br;
-    features[2] = -wb+bb;
-    features[3] = -wn+bn;
-    features[4] = -wq+bq;
-  }
+//  }
+//  else if(turn==BLACK) {
+//   features[0] = -wp+bp;
+//    features[1] = -wr+br;
+//    features[2] = -wb+bb;
+//    features[3] = -wn+bn;
+//    features[4] = -wq+bq;
+//  }
 }
  
-float Board::evaluationFunction(int weights[]) {
+float Board::evaluationFunction(float weights[]) {
   int features[5];
   float value=0;
   for(int i=0; i<5; i++)
@@ -967,3 +967,6 @@ float Board::evaluationFunction(int weights[]) {
   return 1.0/(1+exp(value*-1));
 }
 
+colour_type Board::getTurn() {
+  return turn;
+}

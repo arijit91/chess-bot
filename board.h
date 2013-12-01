@@ -66,7 +66,8 @@ class Board {
   string iterativeDeepening();
   string getMove();
   void extractFeatures(int[]);
-  float evaluationFunction(int[]);
+  float evaluationFunction(float[]);
+  colour_type getTurn();
 
 };
 #endif

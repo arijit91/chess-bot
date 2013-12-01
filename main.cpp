@@ -7,8 +7,10 @@
 #include<ctime>
 #include<cstdlib>
 #include<math.h>
+#include<sstream>
 
 #include"board.h"
+#include"game.h"
 using namespace std;
 
 string startFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -96,7 +98,7 @@ void UciLoop() {
 		}
 }
 
-void tdUpdate(Board state, Board nextState, float reward, int wt[], float eta, bool gameover) {
+void tdUpdate(Board state, Board nextState, float reward, float wt[], float eta, bool gameover) {
   int numFeatures = 5;
   float r=0;
   int features[] = {0,0,0,0,0};
@@ -109,8 +111,11 @@ void tdUpdate(Board state, Board nextState, float reward, int wt[], float eta, b
   else
     r = reward + nextState.evaluationFunction(wt) - V;
   state.extractFeatures(features);
-  for(int i=0; i<numFeatures; i++)
+  for(int i=0; i<numFeatures; i++) {
     value += wt[i]*features[i];
+    //cout<<features[i];
+  }
+  //cout<<endl;
   
   float delV[] = {0.0,0.0,0.0,0.0,0.0};
   for(int i=0; i<numFeatures; i++)
@@ -118,6 +123,35 @@ void tdUpdate(Board state, Board nextState, float reward, int wt[], float eta, b
   
   for(int i=0; i<numFeatures; i++)
     wt[i] += eta*r*delV[i];
+}
+
+vector<Game> extractGames(int numGames) {
+  string data_path = "/home/aparna/quarter1/ai/chess-bot/games/";
+  float reward;
+  int plies;
+  vector<Game> games;
+  for(int i=0; i<numGames; i++) {
+    
+    vector<string> moveList;
+    ifstream fin;
+    ostringstream ss;
+    ss<< (2*i);
+    string filename = data_path + ss.str();
+    const char* fname = filename.c_str();
+    fin.open(fname);
+    fin>>reward;
+    fin>>plies;
+    for(int j=0; j<=plies; j++) {
+      char move[200];
+      fin.getline(move, 200);
+      if(j!=0)
+        moveList.push_back(move);
+    }
+    fin.close();
+    Game g(plies, reward, moveList);
+    games.push_back(g);
+  }
+  return games;
 }
 
 void train() {
@@ -135,16 +169,40 @@ void train() {
    *            Apply move
    *            nextstate = board 
    *            Call TD Update with (state, nextstate, 0, eta, 0)
+   *
    */
-  board.setPositionFromFEN(startFEN);
-  board.printBoard(0,0,0);
-  string movelist[] = {"d4","d5","Nf3", "Nf6", "Nbd2", "e6", "a3", "c5", "dxc5", "Bxc5", "b4", "Bxf2", "Kxf2", "Ng4+", "Kg3", "h5", "Nh4", "Qc7+", "Kf3", "Qc3+", "Kf4", "Qe3"};
+   
+   int numGames = 1575;
+   vector<Game> games;
+   float wt[] = {0.0,0.0,0.0,0.0,0.0};
+   float eta = 1;
+   games = extractGames(numGames);
+   
+   for(int g=0; g<numGames; g++) {
+     Board state, nextState;
+     float reward = games[g].getReward();
+     int plies = games[g].getPlies();
+     for(int i=1; i<plies-1; i++) {
+       board.setPositionFromFEN(games[g].getPosition(i));
+       state = board;
+       board.setPositionFromFEN(games[g].getPosition(i+1));
+       nextState = board;
+       tdUpdate(state, nextState, 0, wt, eta, 0);
+     }
+     if(plies-1 >= 0) {
+       board.setPositionFromFEN(games[g].getPosition(plies-1));
+       tdUpdate(board, board, reward, wt, eta, 1);
+     }
+   }
+   for(int i=0; i<5; i++)
+     cout<<wt[i]<<" ";
 }
 
 
 int main() {
-  //train();
+  train();
   
+  /*  
   srand(time(0));
   //board.setPositionFromFEN(startFEN);
   //board.setPositionFromFEN(pos7FEN);
@@ -167,6 +225,6 @@ int main() {
       return -1;
     }
   }
-
+  */
   return 0;
 }
