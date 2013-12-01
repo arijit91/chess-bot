@@ -915,7 +915,7 @@ string Board::getMove() {
   //return m.getStr();
 }
 
-void Board::extractFeatures(int features[]) {
+void Board::extractFeatures(float features[]) {
   //features[0] = difference in number of pawns
   //features[1] = difference in number of rooks
   //features[2] = difference in number of bishops
@@ -940,31 +940,22 @@ void Board::extractFeatures(int features[]) {
     }
   }
 
-//  if(turn==WHITE) {
-    features[0] = wp-bp;
-    features[1] = wr-br;
-    features[2] = wb-bb;
-    features[3] = wn-bn;
-    features[4] = wq-bq;
-//  }
-//  else if(turn==BLACK) {
-//   features[0] = -wp+bp;
-//    features[1] = -wr+br;
-//    features[2] = -wb+bb;
-//    features[3] = -wn+bn;
-//    features[4] = -wq+bq;
-//  }
+    features[0] = float(wp-bp);
+    features[1] = float(wr-br);
+    features[2] = float(wb-bb);
+    features[3] = float(wn-bn);
+    features[4] = float(wq-bq);
 }
  
 float Board::evaluationFunction(float weights[]) {
-  int features[5];
+  float features[5];
   float value=0;
   for(int i=0; i<5; i++)
     features[i] = 0;
   extractFeatures(features);
   for(int i=0; i<5; i++)
       value += features[i]*weights[i];
-  return 1.0/(1+exp(value*-1));
+  return 1.0/(1+exp(value*-1));  
 }
 
 colour_type Board::getTurn() {

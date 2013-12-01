@@ -98,10 +98,10 @@ void UciLoop() {
 		}
 }
 
-void tdUpdate(Board state, Board nextState, float reward, float wt[], float eta, bool gameover) {
+void tdUpdate(Board state, Board nextState, float reward, float wt[], float delV[], float eta, bool gameover) {
   int numFeatures = 5;
   float r=0;
-  int features[] = {0,0,0,0,0};
+  float features[] = {0,0,0,0,0};
   float V = state.evaluationFunction(wt);
   float value = 0;
  
@@ -110,17 +110,32 @@ void tdUpdate(Board state, Board nextState, float reward, float wt[], float eta,
     r = reward - V;
   else
     r = reward + nextState.evaluationFunction(wt) - V;
+  
+  //cout<<"reward : "<<reward<<endl;
+  //cout<<"V : "<<V<<endl;
+  //cout<<"r : "<<r<<endl;
+  
   state.extractFeatures(features);
+  
+  //cout<<state.getTurn();
+  //cout<<" : ";
+  
   for(int i=0; i<numFeatures; i++) {
     value += wt[i]*features[i];
     //cout<<features[i];
   }
+  
+//  cout<<"  w.f : "<<value<<endl;
+//  cout<<" delV : ";
+  
+  //float delV[] = {0.0,0.0,0.0,0.0,0.0};
+  for(int i=0; i<numFeatures; i++) {
+    delV[i] = features[i]*exp(-1*value)*(V*V);
+    //delV[i] += features[i]*V*(1-V);
+    //cout<<delV[i]<<" ";
+  }
   //cout<<endl;
-  
-  float delV[] = {0.0,0.0,0.0,0.0,0.0};
-  for(int i=0; i<numFeatures; i++)
-    delV[i] = features[i]*exp(-1*value)*V*V;
-  
+
   for(int i=0; i<numFeatures; i++)
     wt[i] += eta*r*delV[i];
 }
@@ -150,29 +165,14 @@ vector<Game> extractGames(int numGames) {
     fin.close();
     Game g(plies, reward, moveList);
     games.push_back(g);
+    
   }
   return games;
 }
 
 void train() {
- 
-  /*
-   * Have a list of games. Each game has a movelist. 
-   * wt = [0,0,0,0,0]
-   * Iterate over the games
-   *    Set start postition
-   *    Iterate over the movelists
-   *        state = current board state
-   *        if state.checkmate or state.draw:
-   *            call TD Update with (state, NULL, win/loss/draw, eta, 1)
-   *        else:
-   *            Apply move
-   *            nextstate = board 
-   *            Call TD Update with (state, nextstate, 0, eta, 0)
-   *
-   */
-   
    int numGames = 1575;
+   //int numGames = 2;
    vector<Game> games;
    float wt[] = {0.0,0.0,0.0,0.0,0.0};
    float eta = 1;
@@ -181,22 +181,33 @@ void train() {
    for(int g=0; g<numGames; g++) {
      Board state, nextState;
      float reward = games[g].getReward();
+     //if(reward==0)
+     //  reward=0.5;
+     //else if(reward==-1)
+     //  reward = 0;
      int plies = games[g].getPlies();
-     for(int i=1; i<plies-1; i++) {
+     float delV[] = {0.0,0.0,0.0,0.0,0.0};
+     for(int i=0; i<plies-1; i++) {
        board.setPositionFromFEN(games[g].getPosition(i));
        state = board;
        board.setPositionFromFEN(games[g].getPosition(i+1));
        nextState = board;
-       tdUpdate(state, nextState, 0, wt, eta, 0);
+       tdUpdate(state, nextState, 0, wt, delV, eta, 0);
      }
-     if(plies-1 >= 0) {
+     //if(plies-1 >= 0) {
        board.setPositionFromFEN(games[g].getPosition(plies-1));
-       tdUpdate(board, board, reward, wt, eta, 1);
-     }
+       tdUpdate(board, board, reward, wt, delV, eta, 1);
+     //}
+
+    //for(int i=0; i<5; i++)
+    // cout<<wt[i]<<" ";
+
+    //cout<<"-------------------------------------"<<endl;
    }
    for(int i=0; i<5; i++)
-     cout<<wt[i]<<" ";
-}
+       cout<<wt[i]<<" ";
+
+   }
 
 
 int main() {

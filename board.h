@@ -65,7 +65,7 @@ class Board {
   int alpha_beta(int, int, int, Line*);
   string iterativeDeepening();
   string getMove();
-  void extractFeatures(int[]);
+  void extractFeatures(float[]);
   float evaluationFunction(float[]);
   colour_type getTurn();
 
