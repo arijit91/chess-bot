@@ -99,21 +99,19 @@ void UciLoop() {
 }
 
 void tdUpdate(Board state, Board nextState, float reward, float wt[], float delV[], float eta, bool gameover) {
-  int numFeatures = 5;
   float r=0;
   float features[] = {0,0,0,0,0};
   float V = state.evaluationFunction(wt);
   float value = 0;
- 
+
   //Check if game is over
   if(gameover)
     r = reward - V;
   else
     r = reward + nextState.evaluationFunction(wt) - V;
-  
+
   //cout<<"reward : "<<reward<<endl;
   //cout<<"V : "<<V<<endl;
-  //cout<<"r : "<<r<<endl;
   
   state.extractFeatures(features);
   
@@ -131,17 +129,20 @@ void tdUpdate(Board state, Board nextState, float reward, float wt[], float delV
   //float delV[] = {0.0,0.0,0.0,0.0,0.0};
   for(int i=0; i<numFeatures; i++) {
     delV[i] = features[i]*exp(-1*value)*(V*V);
-    //delV[i] += features[i]*V*(1-V);
+    //delV[i] = features[i];
     //cout<<delV[i]<<" ";
   }
   //cout<<endl;
 
-  for(int i=0; i<numFeatures; i++)
+  for(int i=0; i<numFeatures; i++) {
+    int old = wt[i];
     wt[i] += eta*r*delV[i];
+    //cout<<old<<" "<<wt[i]<<" "<<eta<<" "<<r<<" "<<delV[i]<<endl;
+  }
 }
 
 vector<Game> extractGames(int numGames) {
-  string data_path = "/home/aparna/quarter1/ai/chess-bot/games/";
+  string data_path = "./games/";
   float reward;
   int plies;
   vector<Game> games;
@@ -174,44 +175,107 @@ void train() {
    int numGames = 1575;
    //int numGames = 2;
    vector<Game> games;
-   float wt[] = {0.0,0.0,0.0,0.0,0.0};
+   float wt[] = {0, 0, 0, 0, 0};
    float eta = 1;
    games = extractGames(numGames);
    
    for(int g=0; g<numGames; g++) {
+     //cout<<endl;
      Board state, nextState;
      float reward = games[g].getReward();
-     //if(reward==0)
-     //  reward=0.5;
-     //else if(reward==-1)
-     //  reward = 0;
+     if(reward==0)
+       reward=0.5;
+     else if(reward==-1) reward = 0; 
      int plies = games[g].getPlies();
      float delV[] = {0.0,0.0,0.0,0.0,0.0};
      for(int i=0; i<plies-1; i++) {
+       if (i+2 < plies - 2) continue;
        board.setPositionFromFEN(games[g].getPosition(i));
        state = board;
        board.setPositionFromFEN(games[g].getPosition(i+1));
        nextState = board;
-       tdUpdate(state, nextState, 0, wt, delV, eta, 0);
+       //tdUpdate(state, nextState, 0, wt, delV, eta, 0);
+       tdUpdate(state, nextState, reward, wt, delV, eta, 0);
      }
-     //if(plies-1 >= 0) {
-       board.setPositionFromFEN(games[g].getPosition(plies-1));
-       tdUpdate(board, board, reward, wt, delV, eta, 1);
-     //}
+     if(plies-1 >= 0) {
+         board.setPositionFromFEN(games[g].getPosition(plies-1));
+         tdUpdate(board, board, reward, wt, delV, eta, 1);
+     }
 
     //for(int i=0; i<5; i++)
     // cout<<wt[i]<<" ";
 
     //cout<<"-------------------------------------"<<endl;
    }
-   for(int i=0; i<5; i++)
-       cout<<wt[i]<<" ";
+   for(int i=0; i<numFeatures; i++)
+       printf("%lf ", wt[i]);
+    cout<<endl;
+}
 
-   }
+void selfplay() {
 
+    int numGames = 100;
+    int game = 0;
+
+    float reward = 0.5;
+    float eta = 1;
+    float wt[] = {0, 0, 0, 0, 0};
+    while (game++ < numGames) {
+        int cnt = 0;
+        vector<Move> moves;
+
+        board.setPositionFromFEN(startFEN);
+
+        while (1) {
+            string move = board.getMove();
+            Move m = board.getMoveFromString(move);
+            moves.push_back(m);
+
+            board.makeMove(m);
+            //board.printBoard();
+
+            cnt++;
+
+            if (board.evaluate() >= 10) {
+                reward = 1;
+                break;
+            }
+            if (board.evaluate() <= -10) {
+                reward = 0;
+                break;
+            }
+            if (cnt >= 500) break;
+        }
+
+        for (int i = 0; i < moves.size(); i++) {
+            Board state, nextState;
+            float delV[] = {0.0,0.0,0.0,0.0,0.0};
+            if (i + 1 < moves.size()) {
+                //if (i+2 < plies - 2) continue;
+                Board state = board;
+                state.makeMove(moves[i]);
+                nextState = state;
+
+                board.makeMove(moves[i]);
+                //tdUpdate(state, nextState, 0, wt, delV, eta, 0);
+                tdUpdate(state, nextState, 0, wt, delV, eta, 0);
+            }
+            else {
+                //board.setPositionFromFEN(games[g].getPosition(plies-1));
+                tdUpdate(board, board, reward, wt, delV, eta, 1);
+            }
+        }
+        cout<<game<<" "<<reward<<endl;
+    }
+    for(int i=0; i<numFeatures; i++)
+        printf("%lf ", wt[i]);
+    cout<<endl;
+}
 
 int main() {
-  train();
+  srand(time(0));
+  selfplay();
+  //train();
   
   /*  
   srand(time(0));

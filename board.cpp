@@ -867,10 +867,10 @@ string Board::iterativeDeepening() {
   //
   Line l;
   //int score = alpha_beta(-INF, INF, 4, &l);
-  max_depth = 5;
+  max_depth = 3;
   for (int i = max_depth; i <= max_depth; i++) {
     int score = alpha_beta(-INF, INF, i, &l);
-    printf("info score cp %d depth %d\n", score, i);
+    //printf("info score cp %d depth %d\n", score, i);
   }
 
   return bestmoves[max_depth];
@@ -941,19 +941,19 @@ void Board::extractFeatures(float features[]) {
   }
 
     features[0] = float(wp-bp);
-    features[1] = float(wr-br);
+    features[1] = float(wn-bn);
     features[2] = float(wb-bb);
-    features[3] = float(wn-bn);
+    features[3] = float(wr-br);
     features[4] = float(wq-bq);
 }
  
 float Board::evaluationFunction(float weights[]) {
   float features[5];
   float value=0;
-  for(int i=0; i<5; i++)
+  for(int i=0; i<numFeatures; i++)
     features[i] = 0;
   extractFeatures(features);
-  for(int i=0; i<5; i++)
+  for(int i=0; i<numFeatures; i++)
       value += features[i]*weights[i];
   return 1.0/(1+exp(value*-1));  
 }

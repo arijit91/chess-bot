@@ -8,6 +8,8 @@ using namespace std;
 
 #define INF 1000000000
 
+#define numFeatures 5
+
 enum piece_type {WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK, NO_PIECE};
 
 enum square_type {

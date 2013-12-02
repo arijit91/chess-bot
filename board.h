@@ -17,6 +17,7 @@ struct Line {
 // class that does everything
 // maybe i shouldn't have called it board
 class Board {
+  public:
   piece_type board[64];
   square_type enp_square;
   bitset<4> castle_rights;
@@ -27,7 +28,6 @@ class Board {
 
   int max_depth;
 
-  public:
   int getKingPos(int);
   bool isColour(int, int);
   bool isEmpty(int);
