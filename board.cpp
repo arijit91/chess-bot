@@ -14,7 +14,8 @@ using namespace std;
 int dKnight[8] = {-17, -15, -10, -6, 6, 10, 15, 17};
 int dKing[8] = {-9, -8, -7, -1, 1, 7, 8, 9};
 
-int piece_values[13] = {1, 3, 3, 5, 9, 1000, -1, -3, -3, -5, -9, -1000, 0};
+int piece_values[13] = {100, 300, 300, 500, 900, 100000, -100, -300, -300, -500, -900, -100000, 0};
+int nodes;
 
 string bestmoves[1005];
 vector<Board> undoMoveList;
@@ -801,6 +802,7 @@ int Board::completeSearch(int depth) {
 }
 
 int Board::quiesce(int alpha, int beta, int depth) {
+  nodes += 1;
   int val = evaluate();
   if (turn == BLACK) val *= -1;
 
@@ -841,6 +843,7 @@ int Board::quiesce(int alpha, int beta, int depth) {
 
 vector<string> info;
 int Board::alpha_beta(int alpha, int beta, int depth, Line* pl) {
+  nodes += 1;
   Line line;
   if (depth == 0) {
     pl->numMoves = 0;
@@ -859,6 +862,10 @@ int Board::alpha_beta(int alpha, int beta, int depth, Line* pl) {
   for (int i = 0; i < sz; i++) {
     ok = true;
     Move m = possibleMovesList[i];
+
+    if (depth == max_depth) {
+      printf("info currmove %s nodes %d\n", m.getStr().c_str(), nodes);
+    }
     makeMove(m);
     info.push_back(m.getStr());
     int score = -alpha_beta(-beta, -alpha, depth - 1, &line);
@@ -874,17 +881,17 @@ int Board::alpha_beta(int alpha, int beta, int depth, Line* pl) {
       alpha = score;
       bestmoves[depth] = m.getStr();
       
-      //pl->argmove[0] = m;
-      //memcpy(pl->argmove + 1, line.argmove, line.numMoves * sizeof(Move));
-      //for (int i = 0; i < line.numMoves; i++) {
-      //  pl->argmove[i+1] = line.argmove[i];
-      //}
-      //pl->numMoves = line.numMoves + 1; 
+      pl->argmove[0] = m;
+      memcpy(pl->argmove + 1, line.argmove, line.numMoves * sizeof(Move));
+      for (int i = 0; i < line.numMoves; i++) {
+        pl->argmove[i+1] = line.argmove[i];
+      }
+      pl->numMoves = line.numMoves + 1; 
     }
 
   }
   if (!ok) {
-    if (inCheck(turn)) return -INF;
+    if (inCheck(turn)) return -INF + 5;
     return 0;
   }
   return alpha;
@@ -912,12 +919,14 @@ void Board::printPossibleMoves(string FEN) {
 string Board::iterativeDeepening() {
   Line l;
   max_depth = 4;
+  nodes = 0;
   for (int i = max_depth; i <= max_depth; i++) {
     int score = alpha_beta(-INF, INF, i, &l);
-    printf("info score cp %d depth %d\n", score, i);
+    printf("info depth %d score cp %d ", i, score);
   }
 
-  return bestmoves[max_depth];
+  //if (bestmoves[max_depth] == "" && possibleMovesList.size() > 0) bestmoves[max_depth] = possibleMovesList[0].getStr();
+  //return bestmoves[max_depth];
 
   printf("pv");
   for (int i = 0; i < max_depth; i++) {
