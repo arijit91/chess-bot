@@ -800,11 +800,55 @@ int Board::completeSearch(int depth) {
   return ret;
 }
 
+int Board::quiesce(int alpha, int beta, int depth) {
+  int val = evaluate();
+  if (turn == BLACK) val *= -1;
+
+  if (val >= beta) {
+    return beta;
+  }
+
+  if (alpha < val) {
+    alpha = val;
+  }
+
+  //if (depth >= 2) return alpha;
+
+  generateMoveList();
+  orderMoveList();
+
+  bool ok = false;
+  for (int i = 0; i < possibleMovesList.size(); i++) {
+    Move m = possibleMovesList[i];
+    if (m.is_capture) {
+      ok = true;
+
+      makeMove(m);
+      int score = -quiesce(-beta, -alpha, depth + 1);
+      undoMove();
+
+      if (score >= beta) {
+        return beta;
+      }
+    
+      if (alpha < score) {
+        alpha = score;
+      }
+    }
+  }
+  return alpha;
+}
+
+vector<string> info;
 int Board::alpha_beta(int alpha, int beta, int depth, Line* pl) {
-  //Line line;
+  Line line;
   if (depth == 0) {
     pl->numMoves = 0;
-    int val = evaluate();
+
+    int val = quiesce(alpha, beta, 0);
+    return val;
+
+    //int val = evaluate();
     if (turn == BLACK) val *= -1;
     return val;
   }
@@ -813,20 +857,23 @@ int Board::alpha_beta(int alpha, int beta, int depth, Line* pl) {
   bool ok = false;
   int sz = possibleMovesList.size();
   for (int i = 0; i < sz; i++) {
+    ok = true;
     Move m = possibleMovesList[i];
     makeMove(m);
-    //int score = -alpha_beta(-beta, -alpha, depth - 1, &line);
-    int score = -alpha_beta(-beta, -alpha, depth - 1, pl);
+    info.push_back(m.getStr());
+    int score = -alpha_beta(-beta, -alpha, depth - 1, &line);
+    //int score = -alpha_beta(-beta, -alpha, depth - 1, pl);
     undoMove();
+    info.pop_back();
 
     if (score >= beta) {
       return beta;
     }
 
     if (score > alpha) {
-      ok = true;
       alpha = score;
       bestmoves[depth] = m.getStr();
+      
       //pl->argmove[0] = m;
       //memcpy(pl->argmove + 1, line.argmove, line.numMoves * sizeof(Move));
       //for (int i = 0; i < line.numMoves; i++) {
@@ -834,9 +881,9 @@ int Board::alpha_beta(int alpha, int beta, int depth, Line* pl) {
       //}
       //pl->numMoves = line.numMoves + 1; 
     }
+
   }
   if (!ok) {
-    // no legal move
     if (inCheck(turn)) return -INF;
     return 0;
   }
@@ -863,25 +910,22 @@ void Board::printPossibleMoves(string FEN) {
 }
 
 string Board::iterativeDeepening() {
-  //completeSearch(max_depth);
-  //
   Line l;
-  //int score = alpha_beta(-INF, INF, 4, &l);
-  max_depth = 3;
+  max_depth = 4;
   for (int i = max_depth; i <= max_depth; i++) {
     int score = alpha_beta(-INF, INF, i, &l);
-    //printf("info score cp %d depth %d\n", score, i);
+    printf("info score cp %d depth %d\n", score, i);
   }
 
   return bestmoves[max_depth];
 
-  //printf("pv");
-  //for (int i = 0; i < max_depth; i++) {
-  //  if (l.argmove[i].from >= 64 || l.argmove[i].to >= 64) break;
-  //  printf(" %s", l.argmove[i].getStr().c_str());
-  //}
-  //printf("\n");
-  //return l.argmove[0].getStr();
+  printf("pv");
+  for (int i = 0; i < max_depth; i++) {
+    //if (l.argmove[i].from >= 64 || l.argmove[i].to >= 64) break;
+    printf(" %s", l.argmove[i].getStr().c_str());
+  }
+  printf("\n");
+  return l.argmove[0].getStr();
 
   //max_depth = 6;
   //vector<string> options;

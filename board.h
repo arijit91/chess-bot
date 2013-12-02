@@ -62,6 +62,7 @@ class Board {
   int evaluate();
   int evalFEN(string);
   int completeSearch(int);
+  int quiesce(int, int, int);
   int alpha_beta(int, int, int, Line*);
   string iterativeDeepening();
   string getMove();

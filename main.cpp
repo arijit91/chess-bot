@@ -273,11 +273,11 @@ void selfplay() {
 }
 
 int main() {
-  srand(time(0));
-  selfplay();
+  //srand(time(0));
+  //selfplay();
   //train();
   
-  /*  
+    
   srand(time(0));
   //board.setPositionFromFEN(startFEN);
   //board.setPositionFromFEN(pos7FEN);
@@ -298,8 +298,8 @@ int main() {
 		if (!strncmp(line, "uci",3)) {
 			UciLoop();
       return -1;
-    }
+ 	   }
   }
-  */
+  
   return 0;
 }
