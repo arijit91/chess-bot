@@ -885,6 +885,8 @@ int Board::quiesce(int alpha, int beta, int depth) {
 }
 
 vector<string> info;
+bool done;
+
 int Board::alpha_beta(int alpha, int beta, int depth, Line* pl) {
   nodes += 1;
   Line line;
@@ -906,7 +908,7 @@ int Board::alpha_beta(int alpha, int beta, int depth, Line* pl) {
     ok = true;
     Move m = possibleMovesList[i];
 
-    if (depth == max_depth) {
+    if (info.size() == 0) {
       printf("info currmove %s nodes %d\n", m.getStr().c_str(), nodes);
     }
     makeMove(m);
@@ -960,55 +962,36 @@ void Board::printPossibleMoves(string FEN) {
 }
 
 string Board::iterativeDeepening() {
-  Line l;
+  Line l, prev;
   max_depth = 4;
-  nodes = 0;
-  for (int i = max_depth; i <= max_depth; i++) {
-    int score = alpha_beta(-INF, INF, i, &l);
-    printf("info depth %d score cp %d ", i, score);
+
+  int depth;
+  for (depth = 1; depth <= max_depth ; depth++) {
+    nodes = 0;
+    done = true;
+    int score = alpha_beta(-INF, INF, depth, &l);
+    if (!done) {
+      l = prev;
+      break;
+    }
+    prev = l;
+
+    printf("info depth %d score cp %d ", depth, score);
+    printf("pv");
+    for (int i = 0; i < depth; i++) {
+      printf(" %s", l.argmove[i].getStr().c_str());
+    }
+    printf("\n");
   }
 
   //if (bestmoves[max_depth] == "" && possibleMovesList.size() > 0) bestmoves[max_depth] = possibleMovesList[0].getStr();
   //return bestmoves[max_depth];
 
-  printf("pv");
-  for (int i = 0; i < max_depth; i++) {
-    //if (l.argmove[i].from >= 64 || l.argmove[i].to >= 64) break;
-    printf(" %s", l.argmove[i].getStr().c_str());
-  }
-  printf("\n");
   return l.argmove[0].getStr();
-
-  //max_depth = 6;
-  //vector<string> options;
-  //int best = -INF;
-
-  //generateMoveList();
-
-  //for (int i = 0; i < possibleMovesList.size(); i++) {
-  //  Move m = possibleMovesList[i];
-  //  makeMove(m);
-  //  int score = -alpha_beta(-INF, INF, max_depth - 1);
-  //  undoMove();
-
-  //  if (score > best) {
-  //    best = score;
-  //    options.clear();
-  //    options.push_back(m.getStr());
-  //  }
-  //  else if (score == best) {
-  //    options.push_back(m.getStr());
-  //  }
-  //}
-  //return options[rand()%(options.size())];
 }
 
 string Board::getMove() {
   return iterativeDeepening();
-  //generateMoveList();
-  //int sz = possibleMovesList.size();
-  //Move m = possibleMovesList[rand()%sz];
-  //return m.getStr();
 }
 
 void Board::extractFeatures(float features[]) {
