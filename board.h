@@ -59,6 +59,9 @@ class Board {
 
   int perft(int);
 
+  int is_end_game();
+
+  int piece_square_evaluation();
   int evaluate();
   int evalFEN(string);
   int completeSearch(int);

@@ -11,10 +11,15 @@
 #include "utils.h"
 using namespace std;
 
+extern int piece_values[13];
+extern int pawn_table[64];
+extern int knight_table[64];
+extern int bishop_table[64];
+extern int king_table[2][64];
+
 int dKnight[8] = {-17, -15, -10, -6, 6, 10, 15, 17};
 int dKing[8] = {-9, -8, -7, -1, 1, 7, 8, 9};
 
-int piece_values[13] = {100, 300, 300, 500, 900, 100000, -100, -300, -300, -500, -900, -100000, 0};
 int nodes;
 
 string bestmoves[1005];
@@ -749,14 +754,52 @@ void Board::printMoveList() {
   }
 }
 
-int Board::evaluate() {
+int Board::is_end_game() {
+  for (int i = a1; i <= a8; i+=8)
+    for (int j = 0; j < 8; j++)
+      if (board[i+j] == WQ || board[i+j] == BQ)
+        return 0;
+  return 1;
+}
+
+int Board::piece_square_evaluation() {
+  int end_game = is_end_game();
   int ret = 0;
   for (int i = a1; i <= a8; i+=8) {
     for (int j = 0; j < 8; j++) {
-      ret += piece_values[board[i+j]];
+      int wsq = 56 - i + j;
+      int bsq = i + 7 - j;
+
+      int val = board[i+j];
+
+      ret += piece_values[val];
+      
+      if (val == WP) ret += pawn_table[wsq];
+      if (val == BP) ret -= pawn_table[bsq];
+
+      if (val == WN) ret += knight_table[wsq];
+      if (val == BN) ret -= knight_table[bsq];
+
+      if (val == WB) ret += bishop_table[wsq];
+      if (val == BB) ret -= bishop_table[bsq];
+
+      if (val == WK) ret += king_table[end_game][wsq];
+      if (val == BK) ret -= king_table[end_game][bsq];
     }
   }
   return ret;
+}
+
+int Board::evaluate() {
+  return piece_square_evaluation();
+
+  //int ret = 0;
+  //for (int i = a1; i <= a8; i+=8) {
+  //  for (int j = 0; j < 8; j++) {
+  //    ret += piece_values[board[i+j]];
+  //  }
+  //}
+  //return ret;
 }
 
 int Board::completeSearch(int depth) {
