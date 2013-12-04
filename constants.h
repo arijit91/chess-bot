@@ -8,7 +8,7 @@ using namespace std;
 
 #define INF 1000000000
 
-#define MS_PER_MOVE 5000
+#define MS_PER_MOVE 1000
 
 #define numFeatures 5
 

@@ -7,6 +7,8 @@
 #include<cstdio>
 #include<math.h>
 
+#include<sys/time.h>
+
 #include "board.h"
 #include "utils.h"
 using namespace std;
@@ -24,6 +26,8 @@ int nodes;
 
 string bestmoves[1005];
 vector<Board> undoMoveList;
+
+timeval begin, end;
 
 void Board::setPositionFromFEN(string fenString) {
   map<char, piece_type> M;
@@ -887,7 +891,18 @@ int Board::quiesce(int alpha, int beta, int depth) {
 vector<string> info;
 bool done;
 
+int get_diff(timeval t1, timeval t2) {
+    return (t2.tv_sec - t1.tv_sec) * 1000 + (t2.tv_usec - t1.tv_usec) / 1000;
+}
+
+
 int Board::alpha_beta(int alpha, int beta, int depth, Line* pl) {
+  gettimeofday(&end, NULL);
+  if (get_diff(begin, end) > MS_PER_MOVE) {
+      done = false;
+      return -1;
+  }
+
   nodes += 1;
   Line line;
   if (depth == 0) {
@@ -962,11 +977,11 @@ void Board::printPossibleMoves(string FEN) {
 }
 
 string Board::iterativeDeepening() {
+  gettimeofday(&begin, NULL);
   Line l, prev;
-  max_depth = 4;
 
   int depth;
-  for (depth = 1; depth <= max_depth ; depth++) {
+  for (depth = 1; ; depth++) {
     nodes = 0;
     done = true;
     int score = alpha_beta(-INF, INF, depth, &l);
